@@ -25,7 +25,7 @@
     armazenar: 'Carnes e aves',
     cidade: '',
     uf: 'SP',
-    energia: '220V - Bifásico / Monofásico',
+    energia: 'A definir / JD avalia',
     volume: 21.0,
     area: 46,
     potenciaHp: 2.5,
