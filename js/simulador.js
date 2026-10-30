@@ -8,6 +8,9 @@
 (function () {
   'use strict';
 
+  // Endpoint do Webhook de Produção / n8n
+  const LEAD_ENDPOINT = 'https://n8n-n8n.6djmf0.easypanel.host/webhook-test/b7874717-cc4b-495a-b3cb-322f3f972153';
+
   // Configuração opcional de WhatsApp
   const WHATSAPP_NUM = ''; // TODO: inserir número oficial se houver (ex: 5532999999999)
 
@@ -347,15 +350,23 @@
           });
         }
 
-        const endpoint = window.LEAD_ENDPOINT || '';
+        const endpoint = LEAD_ENDPOINT || window.LEAD_ENDPOINT || '';
         if (endpoint) {
           fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
-          }).finally(() => showSucesso());
+          })
+            .catch(function (err) {
+              console.warn('Erro ao disparar webhook do formulário:', err);
+            })
+            .finally(function () {
+              showSucesso();
+            });
         } else {
-          setTimeout(() => showSucesso(), 350);
+          setTimeout(function () {
+            showSucesso();
+          }, 350);
         }
       });
     }
