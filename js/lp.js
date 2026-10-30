@@ -58,8 +58,6 @@ const WHATSAPP_NUMBER = ''; // TODO: preencher com DDI+DDD+número (ex.: 5532999
       if (subEl) subEl.textContent = VARIANTS[hParam].sub;
     } else {
       activeVariantKey = 'padrao';
-      if (h1El) h1El.textContent = DEFAULT_HEADLINE.h1;
-      if (subEl) subEl.textContent = DEFAULT_HEADLINE.sub;
     }
 
     if (variantInput) {

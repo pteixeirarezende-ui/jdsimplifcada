@@ -1,0 +1,502 @@
+/* ============================================================================
+   JD CÂMARAS FRIAS — FORMULÁRIO DIRETO DE SIMULAÇÃO (css/simulador.css)
+   Mobile-First, Acessível, Sem Auto-Zoom no iOS, 100% Seguro e Responsivo.
+   ============================================================================ */
+
+/* Container Principal do Formulário */
+.jd-sim-direto-wrap {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.jd-sim-direto-card {
+  background: var(--jd-grafite);
+  border: 1px solid rgba(55, 180, 206, 0.35);
+  border-radius: var(--jd-radius);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  padding: clamp(16px, 3.5vw, 32px);
+  position: relative;
+  overflow: hidden;
+  color: var(--jd-branco);
+  box-sizing: border-box;
+}
+
+.jd-sim-direto-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--jd-azul), var(--jd-ciano), var(--jd-amarelo));
+  z-index: 2;
+}
+
+/* Header do Formulário */
+.jd-sim-direto-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.jd-sim-direto-title {
+  font-family: var(--jd-font-display);
+  font-size: clamp(18px, 2.5vw, 24px);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--jd-branco);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.jd-sim-direto-sub {
+  font-size: 13px;
+  color: var(--jd-cinza-aco);
+  margin-top: 2px;
+}
+
+/* Seções do Formulário */
+.jd-sim-section {
+  margin-bottom: 18px;
+}
+
+.jd-sim-section-label {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--jd-cinza-aco);
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.jd-sim-section-label--required::after {
+  content: '*';
+  color: var(--jd-amarelo);
+  font-size: 14px;
+}
+
+/* 1. SELETOR DE TIPO (Cards em linha no desktop / empilhados no mobile) */
+.jd-sim-tipo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 680px) {
+  .jd-sim-tipo-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.jd-sim-tipo-btn {
+  background: rgba(18, 17, 31, 0.75);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--jd-radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  user-select: none;
+  min-height: 52px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.jd-sim-tipo-btn:hover {
+  background: rgba(65, 129, 188, 0.15);
+  border-color: var(--jd-azul);
+  transform: translateY(-1px);
+}
+
+.jd-sim-tipo-btn.is-selected {
+  border-color: var(--jd-ciano);
+  background: rgba(55, 180, 206, 0.18);
+  box-shadow: 0 0 14px rgba(55, 180, 206, 0.3);
+}
+
+.jd-sim-tipo-btn__icon {
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.jd-sim-tipo-btn__name {
+  font-family: var(--jd-font-display);
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--jd-branco);
+  display: block;
+  line-height: 1.2;
+}
+
+.jd-sim-tipo-btn__temp {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--jd-ciano);
+  display: block;
+}
+
+/* 2. MEDIDAS DO ESPAÇO (3 campos diretos) */
+.jd-sim-medidas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .jd-sim-medidas-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.jd-sim-medida-box {
+  background: rgba(18, 17, 31, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--jd-radius);
+  padding: 10px 12px;
+}
+
+.jd-sim-medida-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--jd-cinza-aco);
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.jd-sim-medida-input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--jd-noite);
+  border: 1.5px solid rgba(55, 180, 206, 0.35);
+  border-radius: var(--jd-radius);
+  height: 48px;
+  overflow: hidden;
+}
+
+.jd-sim-medida-input-wrap:focus-within {
+  border-color: var(--jd-amarelo);
+  box-shadow: 0 0 10px rgba(241, 189, 67, 0.25);
+}
+
+.jd-sim-medida-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--jd-branco);
+  font-family: var(--jd-font-display);
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+  padding: 0 6px;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+
+.jd-sim-medida-unit {
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--jd-ciano);
+  background: rgba(55, 180, 206, 0.12);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-left: 1px solid rgba(55, 180, 206, 0.2);
+}
+
+/* Banner de Telemetria e Cálculo Instantâneo */
+.jd-sim-telemetria-bar {
+  background: #09080F;
+  border: 1.5px solid rgba(55, 180, 206, 0.35);
+  border-radius: var(--jd-radius);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0 18px;
+}
+
+@media (max-width: 600px) {
+  .jd-sim-telemetria-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    padding: 12px;
+  }
+}
+
+.jd-sim-telemetria-metric {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.jd-sim-telemetria-lbl {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--jd-cinza-aco);
+  font-weight: 700;
+}
+
+.jd-sim-telemetria-val {
+  font-family: var(--jd-font-display);
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--jd-amarelo);
+  font-variant-numeric: tabular-nums;
+}
+
+.jd-sim-telemetria-val--pot {
+  color: var(--jd-ciano);
+}
+
+/* 3. GRID DE ARMAZENAMENTO E INFRAESTRUTURA */
+.jd-sim-grid-duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .jd-sim-grid-duo {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.jd-sim-input,
+.jd-sim-select {
+  width: 100%;
+  height: 48px;
+  background: var(--jd-noite);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--jd-radius);
+  color: var(--jd-branco);
+  font-family: var(--jd-font-body);
+  font-size: 16px; /* 16px impede o auto-zoom no Safari iOS */
+  padding: 0 12px;
+  outline: none;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.jd-sim-input:focus,
+.jd-sim-select:focus {
+  border-color: var(--jd-ciano);
+  box-shadow: 0 0 10px rgba(55, 180, 206, 0.25);
+}
+
+.jd-sim-input.is-invalid {
+  border-color: #E53935 !important;
+  box-shadow: 0 0 8px rgba(229, 57, 53, 0.4) !important;
+}
+
+.jd-sim-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* 4. DADOS DE CONTATO E BOTÃO FINAL */
+.jd-sim-contato-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .jd-sim-contato-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.jd-sim-submit-btn {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 16px;
+  touch-action: manipulation;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--jd-font-display);
+  font-size: clamp(15px, 2.2vw, 17px);
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 14px 20px;
+  text-align: center;
+}
+
+.jd-sim-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Sucesso Instantâneo Pós-Cadastro */
+.jd-sim-success-box {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1.5px solid var(--jd-verde);
+  border-radius: var(--jd-radius);
+  padding: 28px 16px;
+  text-align: center;
+  display: none;
+  animation: jd-sim-pop 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.jd-sim-success-box.is-visible {
+  display: block;
+}
+
+@keyframes jd-sim-pop {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Termostato e Efeitos do DS */
+.jd-thermostat-hud {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px;
+  background: #09080F;
+  border: 1px solid rgba(55, 180, 206, 0.35);
+  border-radius: var(--jd-radius);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+}
+
+.jd-led-digits {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--jd-ciano);
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  text-shadow: 0 0 10px rgba(55, 180, 206, 0.7);
+}
+
+.jd-led-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--jd-verde);
+  box-shadow: 0 0 8px rgba(0, 135, 73, 0.9);
+  animation: jd-led-pulse 1.6s ease-in-out infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@keyframes jd-led-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.85); }
+}
+
+.catalog-btn-tool {
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--jd-branco);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--jd-radius);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  font-family: var(--jd-font-body);
+  touch-action: manipulation;
+}
+
+.catalog-btn-tool:hover {
+  background: var(--jd-azul);
+  border-color: var(--jd-azul);
+  color: var(--jd-branco);
+}
+
+.catalog-btn-tool.is-active {
+  background: var(--jd-amarelo);
+  color: var(--jd-preto);
+  border-color: var(--jd-amarelo);
+  box-shadow: 0 0 12px rgba(241, 189, 67, 0.35);
+}
+
+.jd-fan-blade {
+  animation: jd-fan-spin 0.65s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes jd-fan-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Otimizações Mobile Ultra-Específicas */
+@media (max-width: 480px) {
+  .jd-sim-direto-card {
+    padding: 16px 12px;
+    border-radius: 8px;
+  }
+  .jd-sim-direto-title {
+    font-size: 18px;
+  }
+  .jd-sim-medida-box {
+    padding: 8px 10px;
+  }
+  .jd-sim-medida-input {
+    font-size: 16px;
+  }
+  .jd-sim-tipo-btn {
+    padding: 10px 12px;
+  }
+  .jd-sim-tipo-btn__icon {
+    font-size: 22px;
+  }
+  .jd-thermostat-hud {
+    padding: 4px 10px;
+    gap: 8px;
+  }
+  .jd-led-digits {
+    font-size: 18px;
+  }
+  .catalog-btn-tool {
+    font-size: 11px;
+    padding: 4px 8px;
+    min-height: 32px;
+  }
+}
+
+@media (max-width: 600px) {
+  .jd-whatsapp-floating .jd-floating-text {
+    display: none;
+  }
+  .jd-whatsapp-floating {
+    padding: 14px;
+    border-radius: 50%;
+    bottom: 18px;
+    right: 18px;
+  }
+}
