@@ -84,10 +84,10 @@
   font-size: 14px;
 }
 
-/* 1. SELETOR DE TIPO (Cards em linha no desktop / empilhados no mobile) */
+/* 1. SELETOR DE TIPO (5 opções) */
 .jd-sim-tipo-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 10px;
 }
 
@@ -107,7 +107,7 @@
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-align: left;
   user-select: none;
   min-height: 52px;
@@ -128,25 +128,17 @@
 }
 
 .jd-sim-tipo-btn__icon {
-  font-size: 26px;
+  font-size: 24px;
   flex-shrink: 0;
 }
 
 .jd-sim-tipo-btn__name {
   font-family: var(--jd-font-display);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 800;
-  text-transform: uppercase;
   color: var(--jd-branco);
   display: block;
-  line-height: 1.2;
-}
-
-.jd-sim-tipo-btn__temp {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--jd-ciano);
-  display: block;
+  line-height: 1.25;
 }
 
 /* 2. MEDIDAS DO ESPAÇO (3 campos diretos) */

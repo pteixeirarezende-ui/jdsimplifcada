@@ -16,16 +16,13 @@
 
   const estado = {
     tipo: 'resfriados',
-    tipoNome: 'Câmara de Resfriados (0 a +15 °C)',
-    tempText: '0 a +15 °C',
-    tempVal: 2.0,
+    tipoNome: 'Câmara de resfriados (0 a +15 °C)',
     comprimento: 3.0,
     largura: 2.5,
     altura: 2.8,
     armazenar: 'Carnes e aves',
     cidade: '',
     uf: 'SP',
-    energia: 'A definir / JD avalia',
     volume: 21.0,
     area: 46,
     potenciaHp: 2.5,
@@ -34,26 +31,30 @@
   };
 
   const TIPO_CONFIG = {
+    mini: {
+      nome: 'Mini câmara',
+      baseHp: 1.0,
+      hpPerM3: 0.08
+    },
+    expositora: {
+      nome: 'Câmara expositora (walk-in cooler)',
+      baseHp: 1.5,
+      hpPerM3: 0.10
+    },
     resfriados: {
-      nome: 'Câmara de Resfriados (0 a +15 °C)',
-      tempText: '0 a +15 °C',
-      tempVal: 2.0,
+      nome: 'Câmara de resfriados (0 a +15 °C)',
       baseHp: 1.0,
       hpPerM3: 0.08
     },
     congelados: {
-      nome: 'Câmara de Congelados (-18 °C)',
-      tempText: '-18 a -25 °C',
-      tempVal: -18.0,
+      nome: 'Câmara de congelados (-18 °C)',
       baseHp: 1.5,
-      hpPerM3: 0.14
+      hpPerM3: 0.13
     },
-    expositora: {
-      nome: 'Câmara Expositora Walk-in Cooler',
-      tempText: '0 a +5 °C',
-      tempVal: 1.5,
-      baseHp: 1.5,
-      hpPerM3: 0.11
+    indefinido: {
+      nome: 'Ainda não sei',
+      baseHp: 1.25,
+      hpPerM3: 0.09
     }
   };
 
@@ -103,7 +104,7 @@
 
     estado.potenciaHp = hp;
 
-    // Atualiza indicadores na telemetria
+    // Atualiza indicadores na telemetria (se presentes)
     const elVol = document.getElementById('sim-out-vol');
     const elArea = document.getElementById('sim-out-area');
     const elPot = document.getElementById('sim-out-pot');
@@ -111,12 +112,6 @@
     if (elVol) elVol.textContent = estado.volume.toFixed(1).replace('.', ',') + ' m³';
     if (elArea) elArea.textContent = estado.area + ' m²';
     if (elPot) elPot.textContent = estado.potenciaHp + ' HP aprox.';
-
-    // Termostato Danfoss no topo
-    const ledTemp = document.getElementById('live-temp-display');
-    if (ledTemp) {
-      ledTemp.textContent = estado.tempVal > 0 ? '+' + estado.tempVal.toFixed(1).replace('.', ',') : estado.tempVal.toFixed(1).replace('.', ',');
-    }
 
     updateWhatsAppLinks();
   }
@@ -127,9 +122,8 @@
       'Olá! Fiz a simulação de câmara fria na JD e gostaria de receber a proposta oficial:\n\n' +
       '❄ *Tipo:* ' + estado.tipoNome + '\n' +
       '📐 *Medidas:* ' + estado.comprimento.toFixed(1) + 'm (C) × ' + estado.largura.toFixed(1) + 'm (L) × ' + estado.altura.toFixed(1) + 'm (A)\n' +
-      '📦 *Volume Calculado:* ' + estado.volume.toFixed(1) + ' m³ (' + estado.area + ' m² de painéis)\n' +
+      '📦 *Volume:* ' + estado.volume.toFixed(1) + ' m³ (' + estado.area + ' m² de painéis)\n' +
       '🥩 *Produto:* ' + estado.armazenar + '\n' +
-      '⚡ *Rede Elétrica:* ' + estado.energia + '\n' +
       (estado.cidade ? '📍 *Local:* ' + estado.cidade + ' - ' + estado.uf + '\n' : '') +
       (estado.nome ? '👤 *Nome:* ' + estado.nome + '\n' : '') +
       '\nPoderiam me enviar o orçamento com valores de fábrica e prazo?'
@@ -180,7 +174,7 @@
   }
 
   function initSimuladorDireto() {
-    // 1. Tipo de Câmara (Resfriados, Congelados, Expositora)
+    // 1. Tipo de Câmara
     const tipoBtns = document.querySelectorAll('[data-tipo-btn]');
     tipoBtns.forEach(btn => {
       btn.addEventListener('click', function () {
@@ -192,19 +186,6 @@
 
         estado.tipo = key;
         estado.tipoNome = cfg.nome;
-        estado.tempText = cfg.tempText;
-        estado.tempVal = cfg.tempVal;
-
-        // Sincroniza botões do termostato no topo
-        const btnCong = document.getElementById('btn-temp-cong');
-        const btnResf = document.getElementById('btn-temp-resf');
-        if (key === 'congelados') {
-          if (btnCong) btnCong.classList.add('is-active');
-          if (btnResf) btnResf.classList.remove('is-active');
-        } else {
-          if (btnResf) btnResf.classList.add('is-active');
-          if (btnCong) btnCong.classList.remove('is-active');
-        }
 
         updateCalculos();
       });
@@ -226,15 +207,10 @@
     if (inpL) { inpL.addEventListener('input', onDimChange); inpL.addEventListener('change', onDimChange); }
     if (inpA) { inpA.addEventListener('input', onDimChange); inpA.addEventListener('change', onDimChange); }
 
-    // 3. Armazenar, Rede, Cidade e UF
+    // 3. Armazenar, Cidade e UF
     const selArm = document.getElementById('sim-field-armazenar');
     if (selArm) {
       selArm.addEventListener('change', e => { estado.armazenar = sanitize(e.target.value); updateCalculos(); });
-    }
-
-    const selEnergia = document.getElementById('sim-field-energia');
-    if (selEnergia) {
-      selEnergia.addEventListener('change', e => { estado.energia = sanitize(e.target.value); updateCalculos(); });
     }
 
     const inpCidade = document.getElementById('sim-field-cidade');
@@ -318,12 +294,16 @@
           btnSubmit.textContent = 'Enviando Orçamento...';
         }
 
+        const urlParams = new URLSearchParams(window.location.search);
+        function getTrack(key) {
+          return urlParams.get(key) || sessionStorage.getItem('jd_lead_' + key) || '';
+        }
+
         const payload = {
           origem: 'simulador_direto',
           nome: estado.nome,
           whatsapp: estado.whatsapp,
           tipo: estado.tipoNome,
-          temperatura: estado.tempText,
           comprimento: estado.comprimento,
           largura: estado.largura,
           altura: estado.altura,
@@ -331,12 +311,13 @@
           area_m2: estado.area,
           potencia_hp: estado.potenciaHp,
           armazenar: estado.armazenar,
-          energia: estado.energia,
           cidade: estado.cidade,
           uf: estado.uf,
-          utm_source: sessionStorage.getItem('jd_lead_utm_source') || '',
-          utm_medium: sessionStorage.getItem('jd_lead_utm_medium') || '',
-          utm_campaign: sessionStorage.getItem('jd_lead_utm_campaign') || '',
+          utm_source: getTrack('utm_source'),
+          utm_medium: getTrack('utm_medium'),
+          utm_campaign: getTrack('utm_campaign'),
+          utm_content: getTrack('utm_content'),
+          utm_term: getTrack('utm_term'),
           timestamp: new Date().toISOString()
         };
 
@@ -390,24 +371,6 @@
       if (succCard) {
         succCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-    }
-
-    // Termostato botões superiores
-    const btnCong = document.getElementById('btn-temp-cong');
-    const btnResf = document.getElementById('btn-temp-resf');
-
-    if (btnCong) {
-      btnCong.addEventListener('click', function () {
-        const btn = document.querySelector('[data-tipo-btn="congelados"]');
-        if (btn) btn.click();
-      });
-    }
-
-    if (btnResf) {
-      btnResf.addEventListener('click', function () {
-        const btn = document.querySelector('[data-tipo-btn="resfriados"]');
-        if (btn) btn.click();
-      });
     }
 
     // Botões CTA do cabeçalho que rolam até o formulário

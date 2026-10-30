@@ -72,31 +72,6 @@
         
         <!-- Cabeçalho do Hero -->
         <div style="text-align:center;max-width:840px;margin:0 auto 24px;">
-          <!-- Termostato Digital Danfoss LED -->
-          <div style="display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
-            <div class="jd-thermostat-hud" title="Termostato Digital com Telemetria em Tempo Real">
-              <div>
-                <span style="font-size:8px;color:#9CADC2;display:block;margin-bottom:1px;font-weight:700;">NÚCLEO:</span>
-                <div class="jd-led-digits">
-                  <span id="live-temp-display">+2,0</span><span style="font-size:13px;color:var(--jd-cinza-aco);font-weight:600;">°C</span>
-                </div>
-              </div>
-              <div style="border-left:1px solid rgba(255,255,255,0.15);padding-left:10px;text-align:left;">
-                <div class="jd-led-status-dot" style="margin-bottom:2px;"></div>
-                <span style="font-size:8px;color:#008749;font-weight:700;display:block;">ESTANQUE</span>
-              </div>
-            </div>
-
-            <div style="display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center;">
-              <button class="catalog-btn-tool" id="btn-temp-cong" style="font-size:11px;padding:4px 10px;min-height:30px;">
-                <span>❄</span> Congelados (-18 °C)
-              </button>
-              <button class="catalog-btn-tool is-active" id="btn-temp-resf" style="font-size:11px;padding:4px 10px;min-height:30px;">
-                <span>🌡</span> Resfriados (0 a +15 °C)
-              </button>
-            </div>
-          </div>
-
           <h1 class="jd-hero-a__title" id="hero-title" style="font-size:clamp(24px, 3.8vw, 42px);line-height:1.15;margin-bottom:10px;">
             Simulador de Câmara Fria: Calcule e Receba Seu Orçamento
           </h1>
@@ -136,26 +111,29 @@
                 <div class="jd-sim-section">
                   <label class="jd-sim-section-label jd-sim-section-label--required">1. Qual tipo de câmara você procura?</label>
                   <div class="jd-sim-tipo-grid">
-                    <div class="jd-sim-tipo-btn is-selected" data-tipo-btn="resfriados">
-                      <span class="jd-sim-tipo-btn__icon" aria-hidden="true">🌡</span>
-                      <div>
-                        <span class="jd-sim-tipo-btn__name">Resfriados</span>
-                        <span class="jd-sim-tipo-btn__temp">0 a +15 °C</span>
-                      </div>
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="mini">
+                      <span class="jd-sim-tipo-btn__icon" aria-hidden="true">🧊</span>
+                      <span class="jd-sim-tipo-btn__name">Mini câmara</span>
                     </div>
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="congelados">
-                      <span class="jd-sim-tipo-btn__icon" aria-hidden="true">❄</span>
-                      <div>
-                        <span class="jd-sim-tipo-btn__name">Congelados</span>
-                        <span class="jd-sim-tipo-btn__temp">-18 a -25 °C</span>
-                      </div>
-                    </div>
+
                     <div class="jd-sim-tipo-btn" data-tipo-btn="expositora">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">🏪</span>
-                      <div>
-                        <span class="jd-sim-tipo-btn__name">Expositora</span>
-                        <span class="jd-sim-tipo-btn__temp">0 a +5 °C (Vidro)</span>
-                      </div>
+                      <span class="jd-sim-tipo-btn__name">Câmara expositora (walk-in cooler)</span>
+                    </div>
+
+                    <div class="jd-sim-tipo-btn is-selected" data-tipo-btn="resfriados">
+                      <span class="jd-sim-tipo-btn__icon" aria-hidden="true">🌡</span>
+                      <span class="jd-sim-tipo-btn__name">Câmara de resfriados (0 a +15 °C)</span>
+                    </div>
+
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="congelados">
+                      <span class="jd-sim-tipo-btn__icon" aria-hidden="true">❄</span>
+                      <span class="jd-sim-tipo-btn__name">Câmara de congelados (-18 °C)</span>
+                    </div>
+
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="indefinido">
+                      <span class="jd-sim-tipo-btn__icon" aria-hidden="true">❓</span>
+                      <span class="jd-sim-tipo-btn__name">Ainda não sei</span>
                     </div>
                   </div>
                 </div>
@@ -204,42 +182,28 @@
                   </div>
                 </div>
 
-                <!-- 3. PRODUTOS & ENERGIA -->
+                <!-- 3. O QUE VAI ARMAZENAR -->
                 <div class="jd-sim-section">
-                  <div class="jd-sim-grid-duo">
-                    <div>
-                      <label for="sim-field-armazenar" class="jd-sim-section-label jd-sim-section-label--required">3. O que vai armazenar?</label>
-                      <select id="sim-field-armazenar" class="jd-sim-select" required>
-                        <option value="Carnes e aves" selected>🥩 Carnes e Aves</option>
-                        <option value="Bebidas e cervejas">🍺 Bebidas e Cervejas</option>
-                        <option value="Laticínios e queijos">🧀 Laticínios e Queijos</option>
-                        <option value="Hortaliças e frutas">🥬 Hortaliças e Frutas</option>
-                        <option value="Peixes e frutos do mar">🐟 Peixes e Pescados</option>
-                        <option value="Sorvetes, gelo e açaí">🍦 Sorvetes, Gelo e Açaí</option>
-                        <option value="Massas e pães congelados">🥐 Massas e Pães</option>
-                        <option value="Medicamentos e vacinas">💊 Medicamentos e Vacinas</option>
-                        <option value="Flores e folhagens">💐 Flores e Plantas</option>
-                        <option value="Outro produto">📦 Outro Produto</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label for="sim-field-energia" class="jd-sim-section-label">4. Rede elétrica disponível</label>
-                      <select id="sim-field-energia" class="jd-sim-select">
-                        <option value="A definir / JD avalia" selected>❓ Ainda não sei (JD orienta)</option>
-                        <option value="220V - Bifásico / Monofásico">⚡ 220V Monofásico / Bifásico</option>
-                        <option value="220V - Trifásico">⚡ 220V Trifásico</option>
-                        <option value="380V - Trifásico">⚡ 380V Trifásico</option>
-                      </select>
-                    </div>
-                  </div>
+                  <label for="sim-field-armazenar" class="jd-sim-section-label jd-sim-section-label--required">3. O que vai armazenar?</label>
+                  <select id="sim-field-armazenar" class="jd-sim-select" required>
+                    <option value="Carnes e aves" selected>🥩 Carnes e Aves</option>
+                    <option value="Bebidas e cervejas">🍺 Bebidas e Cervejas</option>
+                    <option value="Laticínios e queijos">🧀 Laticínios e Queijos</option>
+                    <option value="Hortaliças e frutas">🥬 Hortaliças e Frutas</option>
+                    <option value="Peixes e frutos do mar">🐟 Peixes e Pescados</option>
+                    <option value="Sorvetes, gelo e açaí">🍦 Sorvetes, Gelo e Açaí</option>
+                    <option value="Massas e pães congelados">🥐 Massas e Pães</option>
+                    <option value="Medicamentos e vacinas">💊 Medicamentos e Vacinas</option>
+                    <option value="Flores e folhagens">💐 Flores e Plantas</option>
+                    <option value="Outro produto">📦 Outro Produto</option>
+                  </select>
                 </div>
 
                 <!-- 4. LOCALIZAÇÃO -->
                 <div class="jd-sim-section">
                   <div class="jd-sim-grid-duo">
                     <div>
-                      <label for="sim-field-cidade" class="jd-sim-section-label jd-sim-section-label--required">5. Cidade de instalação</label>
+                      <label for="sim-field-cidade" class="jd-sim-section-label jd-sim-section-label--required">4. Cidade de instalação</label>
                       <input type="text" id="sim-field-cidade" class="jd-sim-input" placeholder="Sua cidade" required autocomplete="address-level2">
                     </div>
 
@@ -282,7 +246,7 @@
                 <div class="jd-sim-section" style="border-top:1px dashed rgba(255,255,255,0.15);padding-top:16px;">
                   <div class="jd-sim-contato-grid">
                     <div>
-                      <label for="sim-field-nome" class="jd-sim-section-label jd-sim-section-label--required">Seu Nome Completo</label>
+                      <label for="sim-field-nome" class="jd-sim-section-label jd-sim-section-label--required">5. Seu Nome Completo</label>
                       <input type="text" id="sim-field-nome" class="jd-sim-input" placeholder="Como devemos chamar você?" required autocomplete="name">
                     </div>
 
