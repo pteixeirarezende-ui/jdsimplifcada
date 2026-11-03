@@ -4,6 +4,9 @@
  * Zero dependências externas.
  */
 
+// CONFIRMAR: política de privacidade própria da JD
+const PRIVACY_URL = 'https://www.facebook.com/privacy/policy/?locale=pt_BR';
+
 // Endpoint de envio do webhook
 const LEAD_ENDPOINT = 'https://n8n-n8n.6djmf0.easypanel.host/webhook-test/b7874717-cc4b-495a-b3cb-322f3f972153';
 
@@ -622,6 +625,184 @@ const WHATSAPP_NUMBER = ''; // TODO: preencher com DDI+DDD+número (ex.: 5532999
     });
   }
 
+  // 8. BANNER DE COOKIES (LGPD) + CONSENT MODE V2
+  const CONSENT_STORAGE_KEY = 'jd_consent_v1';
+  const CONSENT_EXPIRATION_MS = 365 * 24 * 60 * 60 * 1000; // 12 meses
+
+  function getStoredConsent() {
+    try {
+      const raw = localStorage.getItem(CONSENT_STORAGE_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (!data || typeof data.ts !== 'number') return null;
+      if (Date.now() - data.ts > CONSENT_EXPIRATION_MS) {
+        localStorage.removeItem(CONSENT_STORAGE_KEY);
+        return null;
+      }
+      return data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveConsentDecision(analyticsGranted, adsGranted) {
+    const data = {
+      analytics: Boolean(analyticsGranted),
+      ads: Boolean(adsGranted),
+      ts: Date.now()
+    };
+
+    try {
+      localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {
+      /* noop: fallback silencioso para modo privado */
+    }
+
+    if (typeof window.gtag === 'function') {
+      window.gtag('consent', 'update', {
+        'ad_storage': data.ads ? 'granted' : 'denied',
+        'ad_user_data': data.ads ? 'granted' : 'denied',
+        'ad_personalization': data.ads ? 'granted' : 'denied',
+        'analytics_storage': data.analytics ? 'granted' : 'denied'
+      });
+    }
+
+    if (window.dataLayer) {
+      window.dataLayer.push({
+        event: 'consent_update',
+        consent_analytics: data.analytics,
+        consent_ads: data.ads,
+        lp_version: 'A'
+      });
+    }
+
+    const banner = document.getElementById('lp-cookie-banner');
+    if (banner) {
+      banner.classList.remove('is-visible');
+    }
+  }
+
+  function initCookieBanner() {
+    // Aplica PRIVACY_URL unificada em todos os links da página
+    const privacyLinks = document.querySelectorAll('[data-privacy-link]');
+    privacyLinks.forEach(function (link) {
+      link.href = PRIVACY_URL;
+    });
+
+    const banner = document.getElementById('lp-cookie-banner');
+    if (!banner) return;
+
+    const btnAcceptAll = document.getElementById('lp-cookie-accept-all');
+    const btnRejectAll = document.getElementById('lp-cookie-reject-all');
+    const btnCustomize = document.getElementById('lp-cookie-customize');
+    const panel = document.getElementById('lp-cookie-panel');
+    const btnSave = document.getElementById('lp-cookie-save');
+    const switchAnalytics = document.getElementById('lp-cookie-switch-analytics');
+    const switchAds = document.getElementById('lp-cookie-switch-ads');
+    const btnReopen = document.getElementById('lp-cookie-pref-btn');
+
+    function syncSwitchesWithState(analyticsVal, adsVal) {
+      if (switchAnalytics) {
+        switchAnalytics.setAttribute('aria-checked', analyticsVal ? 'true' : 'false');
+      }
+      if (switchAds) {
+        switchAds.setAttribute('aria-checked', adsVal ? 'true' : 'false');
+      }
+    }
+
+    function toggleSwitch(switchEl) {
+      if (!switchEl || switchEl.disabled) return;
+      const current = switchEl.getAttribute('aria-checked') === 'true';
+      switchEl.setAttribute('aria-checked', current ? 'false' : 'true');
+    }
+
+    function openCustomPanel() {
+      const stored = getStoredConsent();
+      const analyticsVal = stored ? stored.analytics : false;
+      const adsVal = stored ? stored.ads : false;
+      syncSwitchesWithState(analyticsVal, adsVal);
+
+      if (panel) {
+        panel.removeAttribute('hidden');
+      }
+      if (btnCustomize) {
+        btnCustomize.setAttribute('aria-expanded', 'true');
+      }
+      banner.classList.add('is-visible');
+    }
+
+    // Se já houver decisão válida (menor que 12 meses), o banner não aparece na primeira visita
+    const existingConsent = getStoredConsent();
+    if (!existingConsent) {
+      banner.classList.add('is-visible');
+    }
+
+    if (btnAcceptAll) {
+      btnAcceptAll.addEventListener('click', function () {
+        saveConsentDecision(true, true);
+      });
+    }
+
+    if (btnRejectAll) {
+      btnRejectAll.addEventListener('click', function () {
+        saveConsentDecision(false, false);
+      });
+    }
+
+    if (btnCustomize) {
+      btnCustomize.addEventListener('click', function () {
+        const isHidden = panel ? panel.hasAttribute('hidden') : true;
+        if (isHidden) {
+          openCustomPanel();
+        } else if (panel) {
+          panel.setAttribute('hidden', '');
+          btnCustomize.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    if (switchAnalytics) {
+      switchAnalytics.addEventListener('click', function () {
+        toggleSwitch(switchAnalytics);
+      });
+      switchAnalytics.addEventListener('keydown', function (e) {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          toggleSwitch(switchAnalytics);
+        }
+      });
+    }
+
+    if (switchAds) {
+      switchAds.addEventListener('click', function () {
+        toggleSwitch(switchAds);
+      });
+      switchAds.addEventListener('keydown', function (e) {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          toggleSwitch(switchAds);
+        }
+      });
+    }
+
+    if (btnSave) {
+      btnSave.addEventListener('click', function () {
+        const analyticsVal = switchAnalytics ? switchAnalytics.getAttribute('aria-checked') === 'true' : false;
+        const adsVal = switchAds ? switchAds.getAttribute('aria-checked') === 'true' : false;
+        saveConsentDecision(analyticsVal, adsVal);
+      });
+    }
+
+    if (btnReopen) {
+      btnReopen.addEventListener('click', function () {
+        openCustomPanel();
+        if (switchAnalytics) {
+          switchAnalytics.focus();
+        }
+      });
+    }
+  }
+
   // INICIALIZAÇÃO
   function init() {
     applyDynamicHeadline();
@@ -630,6 +811,7 @@ const WHATSAPP_NUMBER = ''; // TODO: preencher com DDI+DDD+número (ex.: 5532999
     initButtons();
     initFAQ();
     initSpotlight();
+    initCookieBanner();
   }
 
   if (document.readyState === 'loading') {

@@ -23,19 +23,41 @@
   <link rel="stylesheet" href="css/lp.css">
   <link rel="stylesheet" href="css/simulador.css">
 
-  <!-- Google Tag Manager -->
-  <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-MQM9DPFR"></script>
+  <!-- Google Consent Mode v2 & Google Tag Manager -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }
-    gtag('js', new Date());
     gtag('consent', 'default', {
-      'ad_storage': 'granted',
-      'ad_user_data': 'granted',
-      'ad_personalization': 'granted',
-      'analytics_storage': 'granted'
+      'ad_storage': 'denied',
+      'ad_user_data': 'denied',
+      'ad_personalization': 'denied',
+      'analytics_storage': 'denied',
+      'functionality_storage': 'granted',
+      'security_storage': 'granted',
+      'wait_for_update': 500
     });
+
+    // Leitura antecipada da decisão salva (Consent Mode v2) antes do script GTM carregar
+    (function () {
+      try {
+        var raw = localStorage.getItem('jd_consent_v1');
+        if (raw) {
+          var data = JSON.parse(raw);
+          var now = Date.now();
+          var oneYearMs = 365 * 24 * 60 * 60 * 1000;
+          if (data && typeof data.ts === 'number' && (now - data.ts) < oneYearMs) {
+            gtag('consent', 'update', {
+              'ad_storage': data.ads ? 'granted' : 'denied',
+              'ad_user_data': data.ads ? 'granted' : 'denied',
+              'ad_personalization': data.ads ? 'granted' : 'denied',
+              'analytics_storage': data.analytics ? 'granted' : 'denied'
+            });
+          }
+        }
+      } catch (e) { /* noop: fallback gracioso para modo privado */ }
+    })();
   </script>
+  <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-MQM9DPFR"></script>
   <!-- End Google Tag Manager -->
 </head>
 
@@ -316,7 +338,8 @@
 
         <div class="jd-footer__links">
           <a href="#simulador-form-card" data-cta-simular>Calcular Orçamento</a>
-          <a href="https://www.facebook.com/privacy/policy/?locale=pt_BR" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>
+          <a href="https://www.facebook.com/privacy/policy/?locale=pt_BR" target="_blank" rel="noopener noreferrer" data-privacy-link>Política de Privacidade</a>
+          <button type="button" class="lp-footer-pref-btn" id="lp-cookie-pref-btn">Preferências de cookies</button>
         </div>
       </div>
 
@@ -338,6 +361,62 @@
     </span>
     <span class="jd-floating-text" style="text-shadow:0 1px 2px rgba(0,0,0,0.3);">Falar no WhatsApp</span>
   </a>
+
+  <!-- ==========================================================================
+       9. BANNER DE COOKIES (LGPD + CONSENT MODE V2)
+       ========================================================================== -->
+  <section class="lp-cookie-banner" id="lp-cookie-banner" role="region" aria-label="Aviso de cookies" aria-live="polite">
+    <div class="lp-cookie-banner__inner">
+      <div class="lp-cookie-banner__main">
+        <h2 class="lp-cookie-banner__title">Sua privacidade</h2>
+        <p class="lp-cookie-banner__text">
+          Usamos cookies para fazer o site funcionar, entender o uso da página e medir nossos anúncios. Você escolhe o que permitir.
+          <a href="https://www.facebook.com/privacy/policy/?locale=pt_BR" target="_blank" rel="noopener noreferrer" class="lp-cookie-banner__link" data-privacy-link>Política de privacidade</a>.
+        </p>
+        <div class="lp-cookie-banner__actions">
+          <button type="button" class="lp-cookie-btn" id="lp-cookie-accept-all">Aceitar todos</button>
+          <button type="button" class="lp-cookie-btn" id="lp-cookie-reject-all">Recusar</button>
+          <button type="button" class="lp-cookie-btn" id="lp-cookie-customize" aria-expanded="false" aria-controls="lp-cookie-panel">Personalizar</button>
+        </div>
+      </div>
+
+      <div class="lp-cookie-panel" id="lp-cookie-panel" hidden>
+        <div class="lp-cookie-panel__row">
+          <div class="lp-cookie-panel__info">
+            <span class="lp-cookie-panel__label">Necessários (sempre ativos)</span>
+            <span class="lp-cookie-panel__desc">Essenciais para o funcionamento básico e segurança da página.</span>
+          </div>
+          <button type="button" class="lp-cookie-switch is-locked" role="switch" aria-checked="true" aria-label="Cookies necessários (sempre ativos)" disabled>
+            <span class="lp-cookie-switch__thumb"></span>
+          </button>
+        </div>
+
+        <div class="lp-cookie-panel__row">
+          <div class="lp-cookie-panel__info">
+            <label class="lp-cookie-panel__label" id="lp-cookie-lbl-analytics">Estatísticas</label>
+            <span class="lp-cookie-panel__desc">Mede visualizações e interações para entendermos o uso da página.</span>
+          </div>
+          <button type="button" class="lp-cookie-switch" id="lp-cookie-switch-analytics" role="switch" aria-checked="false" aria-labelledby="lp-cookie-lbl-analytics">
+            <span class="lp-cookie-switch__thumb"></span>
+          </button>
+        </div>
+
+        <div class="lp-cookie-panel__row">
+          <div class="lp-cookie-panel__info">
+            <label class="lp-cookie-panel__label" id="lp-cookie-lbl-ads">Publicidade</label>
+            <span class="lp-cookie-panel__desc">Permite avaliar e otimizar campanhas e anúncios relevantes.</span>
+          </div>
+          <button type="button" class="lp-cookie-switch" id="lp-cookie-switch-ads" role="switch" aria-checked="false" aria-labelledby="lp-cookie-lbl-ads">
+            <span class="lp-cookie-switch__thumb"></span>
+          </button>
+        </div>
+
+        <div class="lp-cookie-panel__actions">
+          <button type="button" class="lp-cookie-btn lp-cookie-btn--save" id="lp-cookie-save">Salvar escolhas</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Scripts -->
   <script src="js/ds.js"></script>

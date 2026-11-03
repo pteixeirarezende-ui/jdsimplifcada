@@ -72,3 +72,61 @@ A página é **100% estática (HTML/CSS/JS puros)**, sem necessidade de build ou
 * **Servidor Apache / Nginx / Hostinger / cPanel:**
   1. Envie todos os arquivos da pasta raiz para a pasta `public_html` ou `www`.
   2. Certifique-se de manter as pastas `assets/`, `css/` e `js/` relativas ao `index.html`.
+
+---
+
+## 🔒 Verificação 07 — Banner de Cookies (LGPD) + Consent Mode v2
+
+1. **Ordem no dataLayer:**
+   - O `gtag('consent', 'default', ...)` com `ad_storage: 'denied'`, `ad_user_data: 'denied'`, `ad_personalization: 'denied'`, `analytics_storage: 'denied'`, `functionality_storage: 'granted'`, `security_storage: 'granted'`, `wait_for_update: 500` roda no `<head>` no índice `0` (antes do carregamento do GTM).
+   - A leitura da chave `jd_consent_v1` ocorre imediatamente no índice subsequente: se houver decisão com menos de 12 meses, o `gtag('consent', 'update', ...)` é disparado antes do script `gtm.js?id=GTM-MQM9DPFR`.
+   - O script do GTM roda logo após no `<head>`.
+
+2. **Primeira visita:**
+   - O banner `.lp-cookie-banner` fica visível (`is-visible`).
+   - Há exatamente 1 elemento de banner no DOM (`#lp-cookie-banner`).
+   - Não há conflito com `js/ds.js`, pois o banner não utiliza a classe `.jd-cookies` vigiada pelo `initCookies()` do Design System, eliminando handlers duplicados.
+
+3. **Aceitar todos:**
+   - Grava em `localStorage` a chave `jd_consent_v1` com `{ analytics: true, ads: true, ts: <timestamp> }`.
+   - Dispara `gtag('consent', 'update', { ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted', analytics_storage: 'granted' })`.
+   - O banner é fechado e emite `dataLayer.push({ event: 'consent_update', consent_analytics: true, consent_ads: true, lp_version: 'A' })`.
+   - Ao recarregar a página, o banner não reaparece e o update para `granted` roda antes do `gtm.js`.
+
+4. **Recusar:**
+   - Grava `jd_consent_v1` com `{ analytics: false, ads: false, ts: <timestamp> }`.
+   - Dispara `gtag('consent', 'update', ...)` com todas as 4 permissões em `denied`.
+   - Emite evento `consent_update`.
+
+5. **Personalizar (interruptores granulares):**
+   - Linha 1: `Necessários (sempre ativos)` com switch bloqueado/disabled.
+   - Linha 2: `Estatísticas` (`analytics_storage`) com switch acessível (`role="switch"`, `aria-checked`).
+   - Linha 3: `Publicidade` (`ad_storage`, `ad_user_data`, `ad_personalization`).
+   - Botão `Salvar escolhas`: grava no `localStorage`, atualiza o consent e emite o evento correspondente.
+   - Teste Estatísticas=true, Publicidade=false: grava `{ analytics: true, ads: false }` e atualiza permissões de analytics.
+   - Teste Estatísticas=false, Publicidade=true: grava `{ analytics: false, ads: true }` e atualiza permissões de ads.
+
+6. **Reabrir e Acessibilidade:**
+   - Botão `#lp-cookie-pref-btn` no rodapé (com estilo unificado aos links) reabre o banner diretamente no painel de personalização, restaurando o estado atual dos switches.
+   - Suporte a teclado: `Tab`, `Enter` e `Espaço` em todos os botões e interruptores.
+   - Foco visível acessível ativo via `:focus-visible`.
+   - Alvos de toque com altura mínima de 44 px.
+
+7. **Dimensões e Responsividade Mobile:**
+   - Altura máxima restrita a `40vh` (`max-height: 40vh; overflow-y: auto;`) em conformidade com a regra mobile:
+     - 360 × 740: banner ocupa no máximo 296 px (≤ 40% da tela).
+     - 390 × 844: banner ocupa no máximo 337 px (≤ 40% da tela).
+     - Todos os campos do formulário e cabeçalho continuam acessíveis e desobstruídos.
+   - Testado em 360 × 740, 390 × 844, 768 e 1280 sem rolagem horizontal.
+
+8. **Conformidade de Estilo e Semântica:**
+   - Zero `style="..."` adicionados.
+   - Zero textos abaixo de 12 px (utilizados tokens `--jd-text-sm` e `--jd-text-xs` do DS).
+   - Zero IDs duplicados (32 IDs únicos validados).
+   - Zero menções a razões sociais, CNPJs ou e-mails fictícios.
+   - Suporte a `prefers-reduced-motion: reduce`.
+   - Constante única `PRIVACY_URL` centralizada em `js/lp.js` e aplicada dinamicamente via atributo `data-privacy-link`.
+
+9. **O que faltou no DS:**
+   - O Design System (`components.css` / `ds_variacao.html`) não possuía interruptor de toggle/switch (`button[role="switch"]`) nem painel expansível de personalização granular para cookies.
+   - Utilizou-se a estrutura semântica acessível WAI-ARIA em `css/lp.css` com 100% dos tokens oficiais (`--jd-radius-pill`, `--jd-verde`, `--jd-duration-fast`, `--jd-space-*`).
