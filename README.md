@@ -1,6 +1,6 @@
-# JD Câmaras Frias — Landing Page com Simulador Direto
+# JD Câmaras Frias — Landing Page com Formulário Direto de Orçamento
 
-Landing Page de alta conversão para captação de leads de câmaras frigoríficas sob medida, com motor de dimensionamento direto (sem passos), rastreamento avançado (Consent Mode v2, Atribuição com persistência inteligente, `lead_id` idempotente, WhatsApp com código `ref` e verificação HTTP 2xx) e construída 100% sobre o **Design System Oficial da JD Câmaras Frias**.
+Landing Page de alta conversão para captação de leads de câmaras frigoríficas sob medida, com formulário direto, rastreamento avançado (Consent Mode v2, Atribuição inteligente `jd_attrib`, `lead_id` idempotente, WhatsApp com código `ref` e verificação HTTP 2xx) e construída 100% sobre o **Design System Oficial da JD Câmaras Frias**.
 
 ---
 
@@ -20,12 +20,12 @@ LP - JD CAMARAS - Direto/
 │   ├── base.css          # Reset, tipografia e estilos globais
 │   ├── components.css    # Botões, cards, acordeão de FAQ e avisos
 │   ├── lp.css            # Estilos de estrutura e micro-animações da LP
-│   └── simulador.css     # Estilos do formulário direto, erro e telemetria SCADA
+│   └── simulador.css     # Estilos do formulário direto, erro e seletores compactos
 │
 ├── js/                   # Scripts de interatividade e rastreamento
 │   ├── ds.js             # Utilitários do Design System (acordeão, spotlights)
 │   ├── lp.js             # Motor unificado de rastreamento, envio 2xx, lead_id, atribuição e WhatsApp ref
-│   └── simulador.js      # Motor de cálculo físico/térmico e telemetria
+│   └── simulador.js      # Seleção de tipo, dados do produto/medidas, sanitização e WhatsApp
 │
 └── design-system/        # Catálogo técnico e componentes de referência da marca
     ├── ds_variacao.html  # Showcase consolidado de componentes e efeitos do DS
@@ -34,13 +34,93 @@ LP - JD CAMARAS - Direto/
 
 ---
 
-## 📋 Como o Envio Funcionava Antes do Prompt 08 (Análise da Regra 1)
+## 📱 Verificação 09 — Ajustes da LP Direto (Sem Promessa de Cálculo, GTM Oficial, Form Curto no Mobile)
 
-Antes da unificação do Prompt 08, a submissão de dados apresentava o seguinte cenário:
-* **Método e Headers:** `POST`, com `headers: { 'Content-Type': 'application/json' }`.
-* **URL do Webhook (`LEAD_ENDPOINT`):** `https://n8n-n8n.6djmf0.easypanel.host/webhook-test/b7874717-cc4b-495a-b3cb-322f3f972153`.
-* **Comportamento dos Handlers:** `js/lp.js` continha o método legado para o formulário de 2 etapas (`#lp-form-lead`), enquanto `js/simulador.js` possuía um handler direto no formulário `#jd-sim-direto-form`. O disparo de `lead_simulador_direto` ocorria antes da confirmação de rede e enviava dados de PII abertos no dataLayer (`lead_nome` e `lead_whatsapp`), o que infringia boas práticas do GA4. Além disso, se o webhook respondesse 4xx/5xx ou caísse em falha de rede, o formulário podia marcar sucesso indevido no `.finally()`.
-* **Reaproveitamento no Prompt 08:** O envio foi totalmente centralizado em `js/lp.js` em um único handler idempotente sobre `#jd-sim-direto-form`. O `simulador.js` agora apenas gerencia o estado técnico/dimensional e a mensagem do WhatsApp, eliminando qualquer risco de duplo envio ou concorrência de scripts.
+### 1. Eliminação da Promessa de Cálculo / Simulação
+* **Textos na UI visível:**
+  - `<title>`: `"Orçamento de Câmara Fria Sob Medida | JD Câmaras Frias"`.
+  - `<meta name="description">`: `"Informe o que vai armazenar e as medidas do espaço e receba o orçamento da sua câmara fria sob medida pelo WhatsApp."`.
+  - H1 padrão: `"Receba o orçamento da sua câmara fria sob medida"`.
+  - Subtítulo padrão: `"Informe o que vai armazenar e as medidas do espaço. A JD monta o orçamento e envia pelo WhatsApp."`.
+  - Título do card: `"Peça seu Orçamento de Fábrica"`; subtítulo: `"Preencha os dados abaixo e receba sua proposta:"`.
+  - Selo `"⚡ CÁLCULO EM TEMPO REAL"`: **REMOVIDO**.
+  - Botão de envio: `"Receber Meu Orçamento"` (inclusive no estado de retry em `js/lp.js`).
+  - Links de cabeçalho e rodapé: `"Pedir Orçamento"`.
+  - grep por `calcul`, `simul`, `tempo real`, `resultado na hora`: **Zero ocorrências na UI visível**.
+* **Remoção de Potência (HP) e Área de Painéis:**
+  - Removido do `js/simulador.js` o cálculo de HP, área de painéis (m²) e tabela `TIPO_CONFIG` de potência.
+  - Mensagem do WhatsApp: inclui a linha "Volume" apenas se comprimento, largura e altura estiverem todos preenchidos (`Volume = C × L × A em m³`, 1 casa decimal). Nunca inclui HP nem m² de painéis. Medidas vazias omitem completamente as linhas de medidas e volume.
+
+### 2. Snippet Oficial do GTM (Ordem Estrita & Novo Formato)
+* Ordem de execução no `<head>`:
+  1. `window.dataLayer = window.dataLayer || [];`
+  2. `function gtag(){ dataLayer.push(arguments); }`
+  3. `gtag('consent', 'default', { ... ad_storage: 'denied', analytics_storage: 'denied', ... wait_for_update: 500 });`
+  4. IIFE de leitura e update antecipado de `jd_consent_v1`
+  5. `gtag('js', new Date());` (declarado **exatamente 1 vez** em toda a página)
+  6. `<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-MQM9DPFR"></script>`
+* Não há tags duplicadas nem declarações repetidas de `window.dataLayer`.
+
+### 3. Migração para `lp_version: "B"`
+* Input oculto: `<input type="hidden" id="lp-field-lp_version" name="lp_version" value="B">`.
+* Payload de envio do lead: `lp_version: 'B'`.
+* Todos os pushes do `dataLayer` (`pushTrackingEvent`, `lead_form_submit`, `click_whatsapp`, `consent_update`): `lp_version: 'B'`.
+* Payload de beacon/ping do WhatsApp: `lp_version: 'B'`.
+* grep por `'A'` / `"A"` como `lp_version`: **Zero ocorrências**.
+
+### 4. Estado Inicial Vazio & Validação na Ordem Visual
+* **Tipo de câmara:** Nenhum card vem com `is-selected`. Estado inicial `tipo: ''` e `tipoNome: ''`. Se o usuário tentar enviar sem escolher, exibe `#sim-tipo-error` e foca/rola até o grupo de tipos. Opção "Ainda não sei" continua válida.
+* **Medidas opcionais:** Campos sem valor inicial (`value=""`), com placeholder `ex.: 3,0` / `ex.: 2,5` / `ex.: 2,8`. Rótulo sem asterisco: `5. Medidas aproximadas (opcional)`. Se vazias, seguem como string vazia `""` no payload. Se preenchidas, são validadas nos limites operacionais (1 a 30m, 1 a 25m, 1.5 a 8m).
+* **Selects com placeholder obrigatório:**
+  - Armazenar: primeira opção `<option value="" disabled selected>Selecione</option>`.
+  - UF: primeira opção `<option value="" disabled selected>UF</option>`.
+* **Foco no primeiro inválido na ordem visual da tela:** 1) Tipo de câmara, 2) Nome, 3) WhatsApp, 4) Armazenar, 5) Cidade, 6) UF, 7) Medidas (se fora da faixa).
+
+### 5. Medições de Layout & Formulário Mais Curto no Mobile (Ajuste 5)
+* Nova ordem dos blocos:
+  1. `1. Qual tipo de câmara você procura?`
+  2. `2. Seus dados para contato` (Nome + WhatsApp lado a lado no desktop, empilhados no mobile)
+  3. `3. O que vai armazenar?`
+  4. `4. Onde será instalada?` (Cidade + UF compactos lado a lado)
+  5. `5. Medidas aproximadas (opcional)` (3 campos sempre na mesma linha, inclusive no mobile)
+* Divisor tracejado removido antes do contato.
+* Cards de tipo no mobile: 2 colunas com padding vertical compacto (8px 10px), altura de toque ≥ 44px (min-height: 48px), texto em até 2 linhas.
+
+#### Tabela de Coordenadas `getBoundingClientRect()` (Banner Fechado)
+Medições coletadas via Chrome Headless oficial nos 4 viewports exigidos:
+
+| Viewport | Campo | Topo (Y) | Base (Y) | Altura | Meta < 900px? | Rolagem Horiz.? |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **360 × 740** (Mobile Pequeno) | **Nome** | **718 px** | 766 px | 48 px | ✅ **Sim** (718 < 900) | **Zero (360px)** |
+| | **WhatsApp** | **800 px** | 848 px | 48 px | ✅ **Sim** (848 < 900) | |
+| | Tipo Grid | 443 px | 646 px | 203 px | — | |
+| | Armazenar | 896 px | 944 px | 48 px | — | |
+| | Cidade / UF | 1016 px | 1064 px | 48 px | — | |
+| | Medidas (3 cols) | 1110 px | 1195 px | 86 px | — | |
+| | Botão Enviar | 1229 px | 1281 px | 52 px | — | Total: 1812 px |
+| **390 × 844** (iPhone 12/13/14) | **Nome** | **698 px** | 746 px | 48 px | ✅ **Sim** (698 < 900) | **Zero (390px)** |
+| | **WhatsApp** | **779 px** | 827 px | 48 px | ✅ **Sim** (827 < 900) | |
+| | Tipo Grid | 422 px | 626 px | 203 px | — | |
+| | Armazenar | 876 px | 924 px | 48 px | — | |
+| | Cidade / UF | 996 px | 1044 px | 48 px | — | |
+| | Medidas (3 cols) | 1089 px | 1174 px | 86 px | — | |
+| | Botão Enviar | 1208 px | 1260 px | 52 px | — | Total: 1792 px |
+| **768 × 1024** (Tablet) | **Nome** | **641 px** | 689 px | 48 px | ✅ **Sim** (641 < 900) | **Zero (753px)** |
+| | **WhatsApp** | **641 px** | 689 px | 48 px | ✅ **Sim** (lado a lado) | |
+| | Tipo Grid | 355 px | 569 px | 213 px | — | |
+| | Armazenar | 737 px | 785 px | 48 px | — | |
+| | Cidade / UF | 857 px | 905 px | 48 px | — | |
+| | Medidas (3 cols) | 950 px | 1044 px | 94 px | — | |
+| | Botão Enviar | 1078 px | 1130 px | 52 px | — | Total: 1523 px |
+| **1280 × 800** (Desktop) | **Nome** | **660 px** | 708 px | 48 px | ✅ **Sim** (660 < 900) | **Zero (1265px)** |
+| | **WhatsApp** | **660 px** | 708 px | 48 px | ✅ **Sim** (lado a lado) | |
+| | Tipo Grid | 449 px | 588 px | 139 px | — | |
+| | Armazenar | 756 px | 804 px | 48 px | — | |
+| | Cidade / UF | 876 px | 924 px | 48 px | — | |
+| | Medidas (3 cols) | 969 px | 1063 px | 94 px | — | |
+| | Botão Enviar | 1097 px | 1149 px | 52 px | — | Total: 1555 px |
+
+* Conclusão: Em ambos os viewports mobile (360×740 e 390×844), os campos Nome e WhatsApp começam antes de 720px e terminam antes de 850px a partir do topo do documento, atingindo com folga a meta de visibilidade antes de 900px de rolagem.
 
 ---
 
@@ -49,47 +129,26 @@ Antes da unificação do Prompt 08, a submissão de dados apresentava o seguinte
 ### 1. Identificador Único `lead_id`
 * **Geração:** Criado via `crypto.randomUUID()` (com fallback RFC4122 v4) imediatamente na 1ª interação (`focusin` ou `input`) com o formulário.
 * **Persistência:** Gravado na variável `currentLeadId` e no input oculto `#lp-field-lead_id`.
-* **Idempotência:** Em caso de erro de rede ou tentativa de reenvio com o botão **"Tentar de novo"** (`#lp-btn-retry`), o mesmo `lead_id` é preservado, garantindo desduplicação no n8n e nas ferramentas de conversão (GA4/Meta CAPI).
-* **dataLayer:** Dispara `lead_form_start` com `{ event: 'lead_form_start', lead_id, lp_version: 'A', titulo_variante }`.
+* **Idempotência:** Em caso de erro de rede ou tentativa de reenvio com o botão **"Tentar de novo"** (`#lp-btn-retry`), o mesmo `lead_id` é preservado.
+* **dataLayer:** Dispara `lead_form_start` com `{ event: 'lead_form_start', lead_id, lp_version: 'B', titulo_variante }`.
 
 ### 2. Conversão Confiável (`lead_form_submit` Somente em HTTP 2xx)
 * O evento `lead_form_submit` é disparado **estritamente após** a resposta 2xx (`res.ok === true`) do webhook.
-* Em falhas de rede ou status 4xx/5xx, o erro é interceptado pelo `.catch()`, exibe o bloco `#lp-submit-error` com visual do Design System e **NÃO** dispara `lead_form_submit`.
+* Em falhas de rede ou status 4xx/5xx, exibe o bloco `#lp-submit-error` e **NÃO** dispara `lead_form_submit`.
 * **Privacidade e Proteção de PII (GA4):**
   - **Zero PII no root:** Campos `nome`, `cidade`, `email` e `whatsapp` bruto não são enviados no objeto raiz do `dataLayer`.
   - **Formato E.164:** O telefone é normalizado em `user_data.phone_number` com prefixo `+55` (12 ou 13 dígitos): ex.: `+5562999940769`.
-  - Payload emitido no `dataLayer`:
-    ```javascript
-    {
-      event: 'lead_form_submit',
-      lead_id: '...',
-      event_id: '...', // Idêntico ao lead_id para desduplicação
-      tipo_camara: 'Câmara fria resfriados (+10 a 0 °C)',
-      armazenar: 'Carnes e aves',
-      uf: 'SP',
-      lp_version: 'A',
-      titulo_variante: 'padrao',
-      user_data: {
-        phone_number: '+5562999940769'
-      }
-    }
-    ```
 
 ### 3. Atribuição Inteligente (`jd_attrib`) & Consent Mode v2
 * Parâmetros capturados da URL: `gclid`, `gbraid`, `wbraid`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `matchtype`, `device`, `network`.
-* **Regra de Armazenamento sob Consentimento LGPD:**
-  - Se consentimento de publicidade (`ads`) concedido em `jd_consent_v1`: armazenado em `localStorage` sob a chave `jd_attrib` com validade de 90 dias (`90 * 24 * 60 * 60 * 1000`).
-  - Se consentimento de publicidade pendente ou negado: mantido apenas em `sessionStorage`.
-  - Novos parâmetros na URL sobrescrevem os salvos (modelo Last Click).
-* **Campos Ocultos:** Preenchimento automático de `matchtype`, `device`, `network`, `consent_ads`, `consent_analytics`, `lead_id`, `landing_page` (URL completa com `?h=` e parâmetros).
+* Armazenamento: `localStorage` (90 dias) quando consentimento de ads for concedido; `sessionStorage` caso contrário.
 
 ### 4. Payload Final do Webhook (28 Colunas na Ordem Exata)
-O webhook do n8n recebe exatamente as 28 chaves abaixo na ordem solicitada (sem campo `prazo`):
 1. `tipo_evento` (`"lead_form"`)
 2. `lead_id`
-3. `timestamp_envio` (Formato ISO com fuso São Paulo `-03:00`: `YYYY-MM-DDTHH:mm:ss.sss-03:00`)
+3. `timestamp_envio` (ISO com fuso São Paulo `-03:00`)
 4. `nome`
-5. `whatsapp` (Exatamente como o usuário digitou com máscara)
+5. `whatsapp` (com máscara)
 6. `tipo_camara`
 7. `armazenar`
 8. `largura`
@@ -109,68 +168,17 @@ O webhook do n8n recebe exatamente as 28 chaves abaixo na ordem solicitada (sem 
 22. `gbraid`
 23. `wbraid`
 24. `landing_page`
-25. `lp_version` (`"A"`)
+25. `lp_version` (`"B"`)
 26. `titulo_variante`
-27. `consent_ads` (`"granted"` | `"denied"` | `"pending"`)
-28. `consent_analytics` (`"granted"` | `"denied"` | `"pending"`)
-
-* Em modo `?debug=1`, o payload completo e o objeto `jd_attrib` são impressos de forma estruturada no console via `console.group()` e a requisição de rede não é enviada.
-
-### 5. WhatsApp com Código de Referência (`ref`) e Ping Silencioso
-* **Geração do `ref`:** Código de 6 caracteres alfanuméricos em maiúsculas (alfabeto seguro: `A–Z` e `2–9`, sem caracteres ambíguos `0`, `O`, `1`, `I`).
-  - Se o formulário já foi submetido, utiliza os primeiros 6 caracteres do `lead_id` em maiúsculas (`lead_id.slice(0, 6)`).
-* **Mensagem:** O texto pré-preenchido recebe o sufixo ` (ref: <REF>)`.
-* **Ping Silencioso no Webhook:** Ao clicar em qualquer botão com `data-whatsapp-btn` (`sucesso`, `erro`, `cta_final`), dispara uma requisição POST leve ao mesmo webhook com `keepalive: true` contendo `{ tipo_evento: 'click_whatsapp', ref, origem, timestamp_envio, ...atribuição, consent_ads, consent_analytics }`, sem travar a navegação e falhando em silêncio caso a rede oscile.
-* **dataLayer:** Dispara `{ event: 'click_whatsapp', origem, ref, lp_version: 'A', titulo_variante }` 1 vez por clique.
-* **Fallback se `WHATSAPP_NUMBER` vazio:** Rola suavemente até o simulador e exibe aviso `⚠ WHATSAPP_NUMBER vazio` em modo `?debug=1`.
+27. `consent_ads`
+28. `consent_analytics`
 
 ---
 
 ## 🔒 Verificação 07 — Banner de Cookies (LGPD) + Consent Mode v2
 
 1. **Ordem no dataLayer:**
-   - O `gtag('consent', 'default', ...)` com `ad_storage: 'denied'`, `ad_user_data: 'denied'`, `ad_personalization: 'denied'`, `analytics_storage: 'denied'`, `functionality_storage: 'granted'`, `security_storage: 'granted'`, `wait_for_update: 500` roda no `<head>` no índice `0` (antes do carregamento do GTM).
-   - A leitura da chave `jd_consent_v1` ocorre imediatamente no índice subsequente: se houver decisão com menos de 12 meses, o `gtag('consent', 'update', ...)` é disparado antes do script `gtm.js?id=GTM-MQM9DPFR`.
-   - O script do GTM roda logo após no `<head>`.
-
-2. **Primeira visita:**
-   - O banner `.lp-cookie-banner` fica visível (`is-visible`).
-   - Há exatamente 1 elemento de banner no DOM (`#lp-cookie-banner`).
-   - Sem conflito com `js/ds.js`, pois o banner não utiliza a classe `.jd-cookies` do Design System, eliminando handlers duplicados.
-
-3. **Aceitar todos:**
-   - Grava em `localStorage` a chave `jd_consent_v1` com `{ analytics: true, ads: true, ts: <timestamp> }`.
-   - Dispara `gtag('consent', 'update', { ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted', analytics_storage: 'granted' })`.
-   - O banner é fechado e emite `dataLayer.push({ event: 'consent_update', consent_analytics: true, consent_ads: true, lp_version: 'A' })`.
-
-4. **Recusar:**
-   - Grava `jd_consent_v1` com `{ analytics: false, ads: false, ts: <timestamp> }`.
-   - Dispara `gtag('consent', 'update', ...)` com todas as 4 permissões em `denied`.
-   - Emite evento `consent_update`.
-
-5. **Personalizar (interruptores granulares):**
-   - Linha 1: `Necessários (sempre ativos)` com switch bloqueado/disabled.
-   - Linha 2: `Estatísticas` (`analytics_storage`) com switch acessível (`role="switch"`, `aria-checked`).
-   - Linha 3: `Publicidade` (`ad_storage`, `ad_user_data`, `ad_personalization`).
-   - Botão `Salvar escolhas`: grava no `localStorage`, atualiza o consent e emite o evento correspondente.
-
-6. **Reabrir e Acessibilidade:**
-   - Botão `#lp-cookie-pref-btn` no rodapé reabre o banner diretamente no painel de personalização, restaurando o estado atual dos switches.
-   - Suporte a teclado: `Tab`, `Enter` e `Espaço` em todos os botões e interruptores.
-   - Foco visível acessível ativo via `:focus-visible`.
-   - Alvos de toque com altura mínima de 44 px.
-
-7. **Dimensões e Responsividade Mobile:**
-   - Altura máxima restrita a `40vh` (`max-height: 40vh; overflow-y: auto;`) em conformidade com a regra mobile:
-     - 360 × 740: banner ocupa no máximo 296 px (≤ 40% da tela).
-     - 390 × 844: banner ocupa no máximo 337 px (≤ 40% da tela).
-     - Todos os campos do formulário e cabeçalho continuam acessíveis e desobstruídos.
-   - Testado em 360 × 740, 390 × 844, 768 e 1280 sem rolagem horizontal.
-
-8. **Conformidade de Estilo e Semântica:**
-   - Zero `style="..."` adicionados.
-   - Zero textos abaixo de 12 px (utilizados tokens `--jd-text-sm` e `--jd-text-xs` do DS).
-   - Zero IDs duplicados.
-   - Zero menções a razões sociais, CNPJs ou e-mails fictícios.
-   - Suporte a `prefers-reduced-motion: reduce`.
-   - Constante única `PRIVACY_URL` centralizada em `js/lp.js` e aplicada dinamicamente via atributo `data-privacy-link`.
+   - O `gtag('consent', 'default', ...)` roda antes do GTM.
+   - Decisão salva em `jd_consent_v1` atualizada antes do carregamento do GTM.
+2. **Banner Acessível:**
+   - Compatível com WAI-ARIA, foco visível e alvos de toque ≥ 44px.

@@ -1,61 +1,35 @@
 /**
- * JD CÂMARAS FRIAS — SIMULADOR DIRETO (js/simulador.js)
- * Formulário único, direto, sem passos: cálculo em tempo real, alta conversão.
- * 100% seguro (Anti-spam Honeypot, Sanitização, Prevenção de Duplo Envio),
- * Máscara de Telefone BR e Responsividade Mobile Fluida.
+ * JD CÂMARAS FRIAS — FORMULÁRIO DIRETO (js/simulador.js)
+ * Seleção de tipo, dados do produto/medidas, sanitização, máscara BR e links de WhatsApp.
+ * Zero promessa de cálculo em tempo real.
  */
 
 (function () {
   'use strict';
 
-  // Endpoint do Webhook de Produção / n8n
-  const LEAD_ENDPOINT = 'https://n8n-n8n.6djmf0.easypanel.host/webhook-test/b7874717-cc4b-495a-b3cb-322f3f972153';
-
   // Configuração oficial de WhatsApp da JD
   const WHATSAPP_NUM = '5562999940769';
 
   const estado = {
-    tipo: 'resfriados',
-    tipoNome: 'Câmara fria resfriados (+10 a 0 °C)',
-    comprimento: 3.0,
-    largura: 2.5,
-    altura: 2.8,
-    armazenar: 'Carnes e aves',
+    tipo: '',
+    tipoNome: '',
+    comprimento: '',
+    largura: '',
+    altura: '',
+    armazenar: '',
     cidade: '',
-    uf: 'SP',
-    volume: 21.0,
-    area: 46,
-    potenciaHp: 2.5,
+    uf: '',
+    volume: '',
     nome: '',
     whatsapp: ''
   };
 
-  const TIPO_CONFIG = {
-    mini: {
-      nome: 'Mini câmara',
-      baseHp: 1.0,
-      hpPerM3: 0.08
-    },
-    expositora: {
-      nome: 'Câmara fria expositora (0 a -5 °C)',
-      baseHp: 1.5,
-      hpPerM3: 0.10
-    },
-    resfriados: {
-      nome: 'Câmara fria resfriados (+10 a 0 °C)',
-      baseHp: 1.0,
-      hpPerM3: 0.08
-    },
-    congelados: {
-      nome: 'Câmara de congelados (-10 a -18 °C)',
-      baseHp: 1.5,
-      hpPerM3: 0.13
-    },
-    indefinido: {
-      nome: 'Ainda não sei',
-      baseHp: 1.25,
-      hpPerM3: 0.09
-    }
+  const TIPO_NOMES = {
+    mini: 'Mini câmara',
+    expositora: 'Câmara fria expositora (0 a -5 °C)',
+    resfriados: 'Câmara fria resfriados (+10 a 0 °C)',
+    congelados: 'Câmara de congelados (-10 a -18 °C)',
+    indefinido: 'Ainda não sei'
   };
 
   // Sanitizador seguro contra XSS
@@ -73,59 +47,58 @@
     }).trim();
   }
 
-  // Recalcula métricas físicas e térmicas
-  function updateCalculos() {
-    let c = parseFloat(estado.comprimento);
-    let l = parseFloat(estado.largura);
-    let a = parseFloat(estado.altura);
+  // Recalcula volume somente se todas as medidas estiverem preenchidas
+  function updateVolume() {
+    const c = parseFloat(estado.comprimento);
+    const l = parseFloat(estado.largura);
+    const a = parseFloat(estado.altura);
 
-    if (isNaN(c) || c < 1) c = 1.0;
-    if (isNaN(l) || l < 1) l = 1.0;
-    if (isNaN(a) || a < 1.5) a = 1.5;
-
-    const vol = c * l * a;
-    estado.volume = Math.round(vol * 10) / 10;
-
-    const area = 2 * (c * l + c * a + l * a);
-    estado.area = Math.round(area);
-
-    const cfg = TIPO_CONFIG[estado.tipo] || TIPO_CONFIG.resfriados;
-    let hp = cfg.baseHp + (vol * cfg.hpPerM3);
-
-    if (hp <= 1.25) hp = 1.0;
-    else if (hp <= 1.75) hp = 1.5;
-    else if (hp <= 2.25) hp = 2.0;
-    else if (hp <= 2.75) hp = 2.5;
-    else if (hp <= 3.5)  hp = 3.0;
-    else if (hp <= 4.5)  hp = 4.0;
-    else if (hp <= 6.0)  hp = 5.0;
-    else if (hp <= 8.5)  hp = 7.5;
-    else hp = Math.round(hp);
-
-    estado.potenciaHp = hp;
-
-    // Atualiza indicadores na telemetria (se presentes)
-    const elVol = document.getElementById('sim-out-vol');
-    const elArea = document.getElementById('sim-out-area');
-    const elPot = document.getElementById('sim-out-pot');
-
-    if (elVol) elVol.textContent = estado.volume.toFixed(1).replace('.', ',') + ' m³';
-    if (elArea) elArea.textContent = estado.area + ' m²';
-    if (elPot) elPot.textContent = estado.potenciaHp + ' HP aprox.';
+    if (!isNaN(c) && !isNaN(l) && !isNaN(a) && c > 0 && l > 0 && a > 0) {
+      estado.volume = (c * l * a).toFixed(1);
+    } else {
+      estado.volume = '';
+    }
 
     updateWhatsAppLinks();
   }
 
-  // Gera texto para o WhatsApp com todos os dados
-  function getWhatsAppMessage() {
-    return 'Olá! Fiz a simulação de câmara fria na JD e gostaria de receber a proposta oficial:\n\n' +
-      '❄ *Tipo:* ' + estado.tipoNome + '\n' +
-      '📐 *Medidas:* ' + estado.comprimento.toFixed(1) + 'm (C) × ' + estado.largura.toFixed(1) + 'm (L) × ' + estado.altura.toFixed(1) + 'm (A)\n' +
-      '📦 *Volume:* ' + estado.volume.toFixed(1) + ' m³ (' + estado.area + ' m² de painéis)\n' +
-      '🥩 *Produto:* ' + estado.armazenar + '\n' +
-      (estado.cidade ? '📍 *Local:* ' + estado.cidade + ' - ' + estado.uf + '\n' : '') +
-      (estado.nome ? '👤 *Nome:* ' + estado.nome + '\n' : '') +
-      '\nPoderiam me enviar o orçamento com valores de fábrica e prazo?';
+  // Gera texto para o WhatsApp com os dados preenchidos
+  function getWhatsAppMessage(ref) {
+    let msg = 'Olá! Gostaria de receber um orçamento de câmara fria da JD:\n\n';
+
+    if (estado.tipoNome) {
+      msg += '❄ *Tipo:* ' + estado.tipoNome + '\n';
+    }
+
+    const c = parseFloat(estado.comprimento);
+    const l = parseFloat(estado.largura);
+    const a = parseFloat(estado.altura);
+
+    if (!isNaN(c) && !isNaN(l) && !isNaN(a) && c > 0 && l > 0 && a > 0) {
+      const vol = (c * l * a).toFixed(1).replace('.', ',');
+      msg += '📐 *Medidas:* ' + c.toFixed(1) + 'm (C) × ' + l.toFixed(1) + 'm (L) × ' + a.toFixed(1) + 'm (A)\n';
+      msg += '📦 *Volume:* ' + vol + ' m³\n';
+    }
+
+    if (estado.armazenar) {
+      msg += '🥩 *Produto:* ' + estado.armazenar + '\n';
+    }
+
+    if (estado.cidade) {
+      msg += '📍 *Local:* ' + estado.cidade + (estado.uf ? ' - ' + estado.uf : '') + '\n';
+    }
+
+    if (estado.nome) {
+      msg += '👤 *Nome:* ' + estado.nome + '\n';
+    }
+
+    msg += '\nPoderiam me enviar o orçamento com valores de fábrica e prazo?';
+
+    if (ref) {
+      msg += ' (ref: ' + ref + ')';
+    }
+
+    return msg;
   }
 
   function updateWhatsAppLinks() {
@@ -166,31 +139,42 @@
   function initSimuladorDireto() {
     // 1. Tipo de Câmara
     const tipoBtns = document.querySelectorAll('[data-tipo-btn]');
+    const tipoErrorEl = document.getElementById('sim-tipo-error');
+
     tipoBtns.forEach(btn => {
       btn.addEventListener('click', function () {
         tipoBtns.forEach(b => b.classList.remove('is-selected'));
         this.classList.add('is-selected');
 
         const key = this.getAttribute('data-tipo-btn');
-        const cfg = TIPO_CONFIG[key] || TIPO_CONFIG.resfriados;
-
         estado.tipo = key;
-        estado.tipoNome = cfg.nome;
+        estado.tipoNome = TIPO_NOMES[key] || '';
 
-        updateCalculos();
+        if (tipoErrorEl) {
+          tipoErrorEl.classList.remove('is-visible');
+        }
+
+        updateVolume();
+      });
+
+      btn.addEventListener('keydown', function (e) {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          btn.click();
+        }
       });
     });
 
-    // 2. Medidas (Inputs diretos)
+    // 2. Medidas (Inputs diretos opcionais)
     const inpC = document.getElementById('sim-field-c');
     const inpL = document.getElementById('sim-field-l');
     const inpA = document.getElementById('sim-field-a');
 
     function onDimChange() {
-      if (inpC) estado.comprimento = parseFloat(inpC.value) || 2.0;
-      if (inpL) estado.largura = parseFloat(inpL.value) || 2.0;
-      if (inpA) estado.altura = parseFloat(inpA.value) || 2.2;
-      updateCalculos();
+      if (inpC) estado.comprimento = inpC.value.trim();
+      if (inpL) estado.largura = inpL.value.trim();
+      if (inpA) estado.altura = inpA.value.trim();
+      updateVolume();
     }
 
     if (inpC) { inpC.addEventListener('input', onDimChange); inpC.addEventListener('change', onDimChange); }
@@ -200,7 +184,11 @@
     // 3. Armazenar, Cidade e UF
     const selArm = document.getElementById('sim-field-armazenar');
     if (selArm) {
-      selArm.addEventListener('change', e => { estado.armazenar = sanitize(e.target.value); updateCalculos(); });
+      selArm.addEventListener('change', e => {
+        selArm.classList.remove('is-invalid');
+        estado.armazenar = sanitize(e.target.value);
+        updateVolume();
+      });
     }
 
     const inpCidade = document.getElementById('sim-field-cidade');
@@ -208,13 +196,17 @@
       inpCidade.addEventListener('input', e => {
         inpCidade.classList.remove('is-invalid');
         estado.cidade = sanitize(e.target.value);
-        updateCalculos();
+        updateVolume();
       });
     }
 
     const selUf = document.getElementById('sim-field-uf');
     if (selUf) {
-      selUf.addEventListener('change', e => { estado.uf = sanitize(e.target.value); updateCalculos(); });
+      selUf.addEventListener('change', e => {
+        selUf.classList.remove('is-invalid');
+        estado.uf = sanitize(e.target.value);
+        updateVolume();
+      });
     }
 
     // 4. Máscara de Telefone e Validação
@@ -228,7 +220,7 @@
       });
     }
 
-    // Exporta estado e helpers para o motor unificado em lp.js (Prompt 08)
+    // Exporta estado e helpers para o motor unificado em lp.js
     window.simuladorEstado = estado;
     window.getSimuladorWhatsAppMessage = getWhatsAppMessage;
     window.showSimuladorSucesso = showSucesso;
@@ -295,9 +287,6 @@
         }
       });
     });
-
-    // Inicializa cálculos
-    updateCalculos();
   }
 
   if (document.readyState === 'loading') {

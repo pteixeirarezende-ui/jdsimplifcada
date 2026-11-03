@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Simulador de Câmara Fria Online | JD Câmaras Frias</title>
-  <meta name="description" content="Simule o tamanho, volume em m³ e receba o orçamento da sua câmara fria sob medida direto de fábrica. Sem intermediários.">
+  <title>Orçamento de Câmara Fria Sob Medida | JD Câmaras Frias</title>
+  <meta name="description" content="Informe o que vai armazenar e as medidas do espaço e receba o orçamento da sua câmara fria sob medida pelo WhatsApp.">
   <meta name="robots" content="index, follow">
 
   <!-- Favicon -->
@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Estilos Oficiais do Design System & Simulador -->
+  <!-- Estilos Oficiais do Design System -->
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
@@ -35,7 +35,7 @@
       'functionality_storage': 'granted',
       'security_storage': 'granted',
       'wait_for_update': 500
-    });
+     });
 
     // Leitura antecipada da decisão salva (Consent Mode v2) antes do script GTM carregar
     (function () {
@@ -56,6 +56,8 @@
         }
       } catch (e) { /* noop: fallback gracioso para modo privado */ }
     })();
+
+    gtag('js', new Date());
   </script>
   <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-MQM9DPFR"></script>
   <!-- End Google Tag Manager -->
@@ -78,7 +80,7 @@
 
       <div style="display:flex;align-items:center;gap:12px;">
         <a href="#simulador-form-card" class="lp-header-cta" data-cta-simular>
-          <span>Calcular Orçamento</span>
+          <span>Pedir Orçamento</span>
           <span aria-hidden="true">→</span>
         </a>
       </div>
@@ -95,16 +97,16 @@
         <!-- Cabeçalho do Hero -->
         <div style="text-align:center;max-width:840px;margin:0 auto 24px;">
           <h1 class="jd-hero-a__title" id="hero-title" style="font-size:clamp(24px, 3.8vw, 42px);line-height:1.15;margin-bottom:10px;">
-            Simulador de Câmara Fria: Calcule e Receba Seu Orçamento
+            Receba o orçamento da sua câmara fria sob medida
           </h1>
 
           <p class="jd-hero-a__subtitle" id="hero-subtitle" style="font-size:clamp(14px, 1.8vw, 17px);max-width:720px;margin:0 auto;color:var(--jd-cinza-aco);">
-            Informe as medidas do seu espaço e o que vai armazenar para calcular o volume interno (m³) e receber a proposta de fábrica no seu WhatsApp.
+            Informe o que vai armazenar e as medidas do espaço. A JD monta o orçamento e envia pelo WhatsApp.
           </p>
         </div>
 
         <!-- ====================================================================
-             FORMULÁRIO DIRETO DE SIMULAÇÃO (SEM PASSOS — TUDO À VISTA)
+             FORMULÁRIO DIRETO DE ORÇAMENTO (SEM PASSOS — TUDO À VISTA)
              ==================================================================== -->
         <div class="jd-sim-direto-wrap">
           <div class="jd-sim-direto-card jd-cantoneira" id="simulador-form-card">
@@ -113,11 +115,8 @@
               <!-- Cabeçalho do Card -->
               <div class="jd-sim-direto-header">
                 <div>
-                  <h2 class="jd-sim-direto-title">Simulação e Orçamento de Fábrica</h2>
-                  <div class="jd-sim-direto-sub">Preencha os dados abaixo para ver o dimensionamento e receber sua proposta:</div>
-                </div>
-                <div style="font-size:11px;color:var(--jd-ciano);font-weight:800;letter-spacing:0.06em;text-transform:uppercase;">
-                  ⚡ CÁLCULO EM TEMPO REAL
+                  <h2 class="jd-sim-direto-title">Peça seu Orçamento de Fábrica</h2>
+                  <div class="jd-sim-direto-sub">Preencha os dados abaixo e receba sua proposta:</div>
                 </div>
               </div>
 
@@ -143,7 +142,7 @@
                 <input type="hidden" id="lp-field-gbraid" name="gbraid" value="">
                 <input type="hidden" id="lp-field-wbraid" name="wbraid" value="">
                 <input type="hidden" id="lp-field-landing_page" name="landing_page" value="">
-                <input type="hidden" id="lp-field-lp_version" name="lp_version" value="A">
+                <input type="hidden" id="lp-field-lp_version" name="lp_version" value="B">
                 <input type="hidden" id="lp-field-titulo_variante" name="titulo_variante" value="padrao">
                 <input type="hidden" id="lp-field-timestamp_envio" name="timestamp_envio" value="">
                 <input type="hidden" id="lp-field-consent_ads" name="consent_ads" value="pending">
@@ -153,73 +152,46 @@
                 <div class="jd-sim-section">
                   <label class="jd-sim-section-label jd-sim-section-label--required">1. Qual tipo de câmara você procura?</label>
                   <div class="jd-sim-tipo-grid">
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="mini">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="mini" role="button" tabindex="0">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">🧊</span>
                       <span class="jd-sim-tipo-btn__name">Mini câmara</span>
                     </div>
 
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="expositora">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="expositora" role="button" tabindex="0">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">🏪</span>
                       <span class="jd-sim-tipo-btn__name">Câmara fria expositora (0 a -5 °C)</span>
                     </div>
 
-                    <div class="jd-sim-tipo-btn is-selected" data-tipo-btn="resfriados">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="resfriados" role="button" tabindex="0">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">🌡</span>
                       <span class="jd-sim-tipo-btn__name">Câmara fria resfriados (+10 a 0 °C)</span>
                     </div>
 
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="congelados">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="congelados" role="button" tabindex="0">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">❄</span>
                       <span class="jd-sim-tipo-btn__name">Câmara de congelados (-10 a -18 °C)</span>
                     </div>
 
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="indefinido">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="indefinido" role="button" tabindex="0">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">❓</span>
                       <span class="jd-sim-tipo-btn__name">Ainda não sei</span>
                     </div>
                   </div>
+                  <div class="jd-sim-error-msg" id="sim-tipo-error" role="alert">Escolha o tipo de câmara</div>
                 </div>
 
-                <!-- 2. MEDIDAS DO ESPAÇO -->
+                <!-- 2. DADOS DE CONTATO (Ajuste 5: antes de medidas) -->
                 <div class="jd-sim-section">
-                  <label class="jd-sim-section-label jd-sim-section-label--required">
-                    2. Medidas aproximadas do seu espaço (em metros):
-                  </label>
-                  <div class="jd-sim-medidas-grid">
-                    <!-- Comprimento -->
-                    <div class="jd-sim-medida-box">
-                      <div class="jd-sim-medida-lbl">
-                        <span>Comprimento</span>
-                        <span style="color:var(--jd-ciano);">PROFUNDIDADE</span>
-                      </div>
-                      <div class="jd-sim-medida-input-wrap">
-                        <input type="number" id="sim-field-c" class="jd-sim-medida-input" value="3.0" min="1.0" max="30.0" step="0.1" required>
-                        <span class="jd-sim-medida-unit">m</span>
-                      </div>
+                  <label class="jd-sim-section-label jd-sim-section-label--required">2. Seus dados para contato</label>
+                  <div class="jd-sim-contato-grid">
+                    <div>
+                      <label for="sim-field-nome" class="jd-sim-field-sublabel">Seu Nome Completo *</label>
+                      <input type="text" id="sim-field-nome" class="jd-sim-input" placeholder="Como devemos chamar você?" required autocomplete="name">
                     </div>
 
-                    <!-- Largura -->
-                    <div class="jd-sim-medida-box">
-                      <div class="jd-sim-medida-lbl">
-                        <span>Largura</span>
-                        <span style="color:var(--jd-ciano);">FRENTE</span>
-                      </div>
-                      <div class="jd-sim-medida-input-wrap">
-                        <input type="number" id="sim-field-l" class="jd-sim-medida-input" value="2.5" min="1.0" max="25.0" step="0.1" required>
-                        <span class="jd-sim-medida-unit">m</span>
-                      </div>
-                    </div>
-
-                    <!-- Altura -->
-                    <div class="jd-sim-medida-box">
-                      <div class="jd-sim-medida-lbl">
-                        <span>Altura</span>
-                        <span style="color:var(--jd-ciano);">PÉ-DIREITO</span>
-                      </div>
-                      <div class="jd-sim-medida-input-wrap">
-                        <input type="number" id="sim-field-a" class="jd-sim-medida-input" value="2.8" min="1.8" max="8.0" step="0.1" required>
-                        <span class="jd-sim-medida-unit">m</span>
-                      </div>
+                    <div>
+                      <label for="sim-field-whatsapp" class="jd-sim-field-sublabel">WhatsApp com DDD *</label>
+                      <input type="tel" id="sim-field-whatsapp" class="jd-sim-input" placeholder="(00) 00000-0000" inputmode="tel" required autocomplete="tel">
                     </div>
                   </div>
                 </div>
@@ -228,7 +200,8 @@
                 <div class="jd-sim-section">
                   <label for="sim-field-armazenar" class="jd-sim-section-label jd-sim-section-label--required">3. O que vai armazenar?</label>
                   <select id="sim-field-armazenar" class="jd-sim-select" required>
-                    <option value="Carnes e aves" selected>🥩 Carnes e Aves</option>
+                    <option value="" disabled selected>Selecione</option>
+                    <option value="Carnes e aves">🥩 Carnes e Aves</option>
                     <option value="Bebidas e cervejas">🍺 Bebidas e Cervejas</option>
                     <option value="Laticínios e queijos">🧀 Laticínios e Queijos</option>
                     <option value="Hortaliças e frutas">🥬 Hortaliças e Frutas</option>
@@ -243,16 +216,18 @@
 
                 <!-- 4. LOCALIZAÇÃO -->
                 <div class="jd-sim-section">
+                  <label class="jd-sim-section-label jd-sim-section-label--required">4. Onde será instalada?</label>
                   <div class="jd-sim-grid-duo">
                     <div>
-                      <label for="sim-field-cidade" class="jd-sim-section-label jd-sim-section-label--required">4. Cidade de instalação</label>
+                      <label for="sim-field-cidade" class="jd-sim-field-sublabel">Cidade de instalação *</label>
                       <input type="text" id="sim-field-cidade" class="jd-sim-input" placeholder="Sua cidade" required autocomplete="address-level2">
                     </div>
 
                     <div>
-                      <label for="sim-field-uf" class="jd-sim-section-label jd-sim-section-label--required">Estado (UF)</label>
+                      <label for="sim-field-uf" class="jd-sim-field-sublabel">Estado (UF) *</label>
                       <select id="sim-field-uf" class="jd-sim-select" required autocomplete="address-level1">
-                        <option value="SP" selected>São Paulo (SP)</option>
+                        <option value="" disabled selected>UF</option>
+                        <option value="SP">São Paulo (SP)</option>
                         <option value="MG">Minas Gerais (MG)</option>
                         <option value="RJ">Rio de Janeiro (RJ)</option>
                         <option value="ES">Espírito Santo (ES)</option>
@@ -284,24 +259,50 @@
                   </div>
                 </div>
 
-                <!-- 5. DADOS DE CONTATO -->
-                <div class="jd-sim-section" style="border-top:1px dashed rgba(255,255,255,0.15);padding-top:16px;">
-                  <div class="jd-sim-contato-grid">
-                    <div>
-                      <label for="sim-field-nome" class="jd-sim-section-label jd-sim-section-label--required">5. Seu Nome Completo</label>
-                      <input type="text" id="sim-field-nome" class="jd-sim-input" placeholder="Como devemos chamar você?" required autocomplete="name">
+                <!-- 5. MEDIDAS DO ESPAÇO (OPCIONAL, 3 NA MESMA LINHA) -->
+                <div class="jd-sim-section">
+                  <label class="jd-sim-section-label">
+                    5. Medidas aproximadas (opcional)
+                  </label>
+                  <div class="jd-sim-medidas-grid">
+                    <!-- Comprimento -->
+                    <div class="jd-sim-medida-box">
+                      <div class="jd-sim-medida-lbl">
+                        <span>Comprimento</span>
+                      </div>
+                      <div class="jd-sim-medida-input-wrap">
+                        <input type="number" id="sim-field-c" class="jd-sim-medida-input" placeholder="ex.: 3,0" min="1.0" max="30.0" step="0.1">
+                        <span class="jd-sim-medida-unit">m</span>
+                      </div>
                     </div>
 
-                    <div>
-                      <label for="sim-field-whatsapp" class="jd-sim-section-label jd-sim-section-label--required">WhatsApp com DDD</label>
-                      <input type="tel" id="sim-field-whatsapp" class="jd-sim-input" placeholder="(00) 00000-0000" inputmode="tel" required autocomplete="tel">
+                    <!-- Largura -->
+                    <div class="jd-sim-medida-box">
+                      <div class="jd-sim-medida-lbl">
+                        <span>Largura</span>
+                      </div>
+                      <div class="jd-sim-medida-input-wrap">
+                        <input type="number" id="sim-field-l" class="jd-sim-medida-input" placeholder="ex.: 2,5" min="1.0" max="25.0" step="0.1">
+                        <span class="jd-sim-medida-unit">m</span>
+                      </div>
+                    </div>
+
+                    <!-- Altura -->
+                    <div class="jd-sim-medida-box">
+                      <div class="jd-sim-medida-lbl">
+                        <span>Altura</span>
+                      </div>
+                      <div class="jd-sim-medida-input-wrap">
+                        <input type="number" id="sim-field-a" class="jd-sim-medida-input" placeholder="ex.: 2,8" min="1.5" max="8.0" step="0.1">
+                        <span class="jd-sim-medida-unit">m</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- BOTÃO DE ENVIO PRINCIPAL -->
                 <button type="submit" class="jd-btn jd-btn--primary jd-sim-submit-btn" id="sim-btn-submit">
-                  <span>Calcular e Receber Meu Orçamento</span>
+                  <span>Receber Meu Orçamento</span>
                 </button>
 
                 <p style="font-size:12px;color:var(--jd-cinza-aco);text-align:center;margin-top:12px;">
@@ -310,7 +311,7 @@
 
                 <!-- BLOCO DE ERRO DE ENVIO (Prompt 08) -->
                 <div class="jd-sim-error-box" id="lp-submit-error" role="alert" aria-live="assertive">
-                  <div class="jd-sim-error-box__title">Não foi possível enviar sua simulação</div>
+                  <div class="jd-sim-error-box__title">Não foi possível enviar sua solicitação</div>
                   <div class="jd-sim-error-box__desc">
                     Houve uma instabilidade temporária na conexão. Você pode tentar novamente ou falar diretamente com nossos consultores no WhatsApp.
                   </div>
@@ -369,7 +370,7 @@
         </div>
 
         <div class="jd-footer__links">
-          <a href="#simulador-form-card" data-cta-simular>Calcular Orçamento</a>
+          <a href="#simulador-form-card" data-cta-simular>Pedir Orçamento</a>
           <a href="https://www.facebook.com/privacy/policy/?locale=pt_BR" target="_blank" rel="noopener noreferrer" data-privacy-link>Política de Privacidade</a>
           <button type="button" class="lp-footer-pref-btn" id="lp-cookie-pref-btn">Preferências de cookies</button>
         </div>

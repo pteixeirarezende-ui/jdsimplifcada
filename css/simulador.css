@@ -93,9 +93,54 @@
 
 @media (max-width: 680px) {
   .jd-sim-tipo-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
+
+  .jd-sim-tipo-btn {
+    padding: 8px 10px;
+    gap: 8px;
+    min-height: 48px;
+  }
+
+  .jd-sim-tipo-btn__icon {
+    font-size: 20px;
+  }
+
+  .jd-sim-tipo-btn__name {
+    font-size: 12px;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .jd-sim-tipo-btn[data-tipo-btn="indefinido"] {
+    grid-column: span 2;
+  }
+}
+
+.jd-sim-error-msg {
+  display: none;
+  font-size: 12px;
+  color: #ff6b6b;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.jd-sim-error-msg.is-visible {
+  display: block;
+}
+
+.jd-sim-field-sublabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--jd-cinza-aco);
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  display: block;
 }
 
 .jd-sim-tipo-btn {
@@ -141,7 +186,7 @@
   line-height: 1.25;
 }
 
-/* 2. MEDIDAS DO ESPAÇO (3 campos diretos) */
+/* 5. MEDIDAS DO ESPAÇO (3 campos diretos, sempre 3 colunas) */
 .jd-sim-medidas-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -150,8 +195,31 @@
 
 @media (max-width: 600px) {
   .jd-sim-medidas-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .jd-sim-medida-box {
+    padding: 6px 8px;
+  }
+
+  .jd-sim-medida-lbl {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+
+  .jd-sim-medida-input-wrap {
+    height: 44px;
+  }
+
+  .jd-sim-medida-input {
+    font-size: 15px;
+    padding: 0 4px;
+  }
+
+  .jd-sim-medida-unit {
+    padding: 0 8px;
+    font-size: 12px;
   }
 }
 
@@ -262,7 +330,7 @@
   color: var(--jd-ciano);
 }
 
-/* 3. GRID DE ARMAZENAMENTO E INFRAESTRUTURA */
+/* 3. GRID DE CIDADE E ESTADO (UF) */
 .jd-sim-grid-duo {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -271,8 +339,8 @@
 
 @media (max-width: 640px) {
   .jd-sim-grid-duo {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: 1.8fr 1.2fr;
+    gap: 8px;
   }
 }
 
@@ -298,7 +366,8 @@
   box-shadow: 0 0 10px rgba(55, 180, 206, 0.25);
 }
 
-.jd-sim-input.is-invalid {
+.jd-sim-input.is-invalid,
+.jd-sim-select.is-invalid {
   border-color: #E53935 !important;
   box-shadow: 0 0 8px rgba(229, 57, 53, 0.4) !important;
 }
@@ -307,17 +376,17 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
-/* 4. DADOS DE CONTATO E BOTÃO FINAL */
+/* 4. DADOS DE CONTATO E BOTÃO FINAL (Ajuste 5: empilhado < 768px, lado a lado >= 768px) */
 .jd-sim-contato-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
   .jd-sim-contato-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 }
 
@@ -495,16 +564,17 @@
     font-size: 18px;
   }
   .jd-sim-medida-box {
-    padding: 8px 10px;
+    padding: 6px 8px;
   }
   .jd-sim-medida-input {
-    font-size: 16px;
+    font-size: 15px;
   }
   .jd-sim-tipo-btn {
-    padding: 10px 12px;
+    padding: 8px 10px;
+    min-height: 48px;
   }
   .jd-sim-tipo-btn__icon {
-    font-size: 22px;
+    font-size: 20px;
   }
   .jd-thermostat-hud {
     padding: 4px 10px;

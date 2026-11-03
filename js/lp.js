@@ -1,5 +1,5 @@
 /**
- * JD CÂMARAS FRIAS — LP A (Versão Direta)
+ * JD CÂMARAS FRIAS — LP B (Versão Direta)
  * lp.js: Lógica de negócio, formulário direto, Consent Mode v2, Atribuição jd_attrib,
  * lead_id único, envio seguro ao Webhook n8n (HTTP 2xx) e WhatsApp com código de referência (ref).
  * Zero dependências externas.
@@ -41,6 +41,11 @@ const WHATSAPP_NUMBER = '5562999940769';
     }
   };
 
+  const DEFAULT_HEADLINE = {
+    h1: 'Receba o orçamento da sua câmara fria sob medida',
+    sub: 'Informe o que vai armazenar e as medidas do espaço. A JD monta o orçamento e envia pelo WhatsApp.'
+  };
+
   let activeVariantKey = 'padrao';
 
   function applyDynamicHeadline() {
@@ -57,6 +62,8 @@ const WHATSAPP_NUMBER = '5562999940769';
       if (subEl) subEl.textContent = VARIANTS[hParam].sub;
     } else {
       activeVariantKey = 'padrao';
+      if (h1El) h1El.textContent = DEFAULT_HEADLINE.h1;
+      if (subEl) subEl.textContent = DEFAULT_HEADLINE.sub;
     }
 
     if (variantInput) {
@@ -70,7 +77,7 @@ const WHATSAPP_NUMBER = '5562999940769';
   function pushTrackingEvent(eventName, extraData) {
     const payload = Object.assign({
       event: eventName,
-      lp_version: 'A',
+      lp_version: 'B',
       titulo_variante: activeVariantKey
     }, extraData || {});
     window.dataLayer.push(payload);
@@ -283,7 +290,7 @@ const WHATSAPP_NUMBER = '5562999940769';
     return ref;
   }
 
-  // 9. MOTOR DO FORMULÁRIO DIRETO DE SIMULAÇÃO (Com validação e retry)
+  // 9. MOTOR DO FORMULÁRIO DIRETO (Validação em ordem visual, retry e envio 2xx)
   function initDirectLeadForm() {
     const form = document.getElementById('jd-sim-direto-form');
     if (!form) return;
@@ -313,11 +320,38 @@ const WHATSAPP_NUMBER = '5562999940769';
         if (btnSubmit) {
           btnSubmit.disabled = false;
           btnSubmit.classList.remove('is-loading');
-          btnSubmit.innerHTML = '<span>Calcular e Receber Meu Orçamento</span>';
+          btnSubmit.innerHTML = '<span>Receber Meu Orçamento</span>';
           btnSubmit.focus();
         }
       });
     }
+
+    // Limpa classe is-invalid ao interagir com campos
+    const nomeInp = document.getElementById('sim-field-nome');
+    const waInp = document.getElementById('sim-field-whatsapp');
+    const cidInp = document.getElementById('sim-field-cidade');
+    const ufInp = document.getElementById('sim-field-uf');
+    const armInp = document.getElementById('sim-field-armazenar');
+    const inpC = document.getElementById('sim-field-c');
+    const inpL = document.getElementById('sim-field-l');
+    const inpA = document.getElementById('sim-field-a');
+    const tipoErrorEl = document.getElementById('sim-tipo-error');
+
+    [nomeInp, waInp, cidInp, inpC, inpL, inpA].forEach(function (inp) {
+      if (inp) {
+        inp.addEventListener('input', function () {
+          inp.classList.remove('is-invalid');
+        });
+      }
+    });
+
+    [armInp, ufInp].forEach(function (sel) {
+      if (sel) {
+        sel.addEventListener('change', function () {
+          sel.classList.remove('is-invalid');
+        });
+      }
+    });
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -331,46 +365,97 @@ const WHATSAPP_NUMBER = '5562999940769';
         return;
       }
 
-      const nomeInp = document.getElementById('sim-field-nome');
-      const waInp = document.getElementById('sim-field-whatsapp');
-      const cidInp = document.getElementById('sim-field-cidade');
-      const ufInp = document.getElementById('sim-field-uf');
-      const armInp = document.getElementById('sim-field-armazenar');
-      const inpC = document.getElementById('sim-field-c');
-      const inpL = document.getElementById('sim-field-l');
-      const inpA = document.getElementById('sim-field-a');
-
       let hasError = false;
+      let firstInvalidEl = null;
 
-      // Validação Nome
-      if (!nomeInp || nomeInp.value.trim().length < 3) {
-        if (nomeInp) {
-          nomeInp.classList.add('is-invalid');
-          nomeInp.focus();
+      // 1. Validação Tipo de Câmara (Ordem visual 1)
+      const tipoSelected = document.querySelector('[data-tipo-btn].is-selected');
+      if (!tipoSelected) {
+        if (tipoErrorEl) tipoErrorEl.classList.add('is-visible');
+        if (!firstInvalidEl) {
+          firstInvalidEl = document.querySelector('[data-tipo-btn]') || tipoErrorEl;
         }
+        hasError = true;
+      } else if (tipoErrorEl) {
+        tipoErrorEl.classList.remove('is-visible');
+      }
+
+      // 2. Validação Nome Completo (Ordem visual 2)
+      if (!nomeInp || nomeInp.value.trim().length < 3) {
+        if (nomeInp) nomeInp.classList.add('is-invalid');
+        if (!firstInvalidEl) firstInvalidEl = nomeInp;
         hasError = true;
       }
 
-      // Validação WhatsApp
+      // 3. Validação WhatsApp (Ordem visual 2)
       const waDigits = (waInp ? waInp.value : '').replace(/\D/g, '');
       if (waDigits.length < 10) {
-        if (waInp) {
-          waInp.classList.add('is-invalid');
-          if (!hasError) waInp.focus();
-        }
+        if (waInp) waInp.classList.add('is-invalid');
+        if (!firstInvalidEl) firstInvalidEl = waInp;
         hasError = true;
       }
 
-      // Validação Cidade
+      // 4. Validação O que vai armazenar (Ordem visual 3)
+      if (!armInp || !armInp.value) {
+        if (armInp) armInp.classList.add('is-invalid');
+        if (!firstInvalidEl) firstInvalidEl = armInp;
+        hasError = true;
+      }
+
+      // 5. Validação Cidade de instalação (Ordem visual 4)
       if (!cidInp || cidInp.value.trim().length < 2) {
-        if (cidInp) {
-          cidInp.classList.add('is-invalid');
-          if (!hasError) cidInp.focus();
-        }
+        if (cidInp) cidInp.classList.add('is-invalid');
+        if (!firstInvalidEl) firstInvalidEl = cidInp;
         hasError = true;
       }
 
-      if (hasError) return;
+      // 6. Validação Estado UF (Ordem visual 4)
+      if (!ufInp || !ufInp.value) {
+        if (ufInp) ufInp.classList.add('is-invalid');
+        if (!firstInvalidEl) firstInvalidEl = ufInp;
+        hasError = true;
+      }
+
+      // 7. Validação Medidas opcionais (Ordem visual 5: se preenchidas, devem estar na faixa válida)
+      if (inpC && inpC.value.trim() !== '') {
+        const cVal = parseFloat(inpC.value);
+        if (isNaN(cVal) || cVal < 1.0 || cVal > 30.0) {
+          inpC.classList.add('is-invalid');
+          if (!firstInvalidEl) firstInvalidEl = inpC;
+          hasError = true;
+        }
+      }
+
+      if (inpL && inpL.value.trim() !== '') {
+        const lVal = parseFloat(inpL.value);
+        if (isNaN(lVal) || lVal < 1.0 || lVal > 25.0) {
+          inpL.classList.add('is-invalid');
+          if (!firstInvalidEl) firstInvalidEl = inpL;
+          hasError = true;
+        }
+      }
+
+      if (inpA && inpA.value.trim() !== '') {
+        const aVal = parseFloat(inpA.value);
+        if (isNaN(aVal) || aVal < 1.5 || aVal > 8.0) {
+          inpA.classList.add('is-invalid');
+          if (!firstInvalidEl) firstInvalidEl = inpA;
+          hasError = true;
+        }
+      }
+
+      // Se houver erro, rola e foca no primeiro inválido na ordem visual
+      if (hasError) {
+        if (firstInvalidEl) {
+          if (typeof firstInvalidEl.focus === 'function') {
+            firstInvalidEl.focus();
+          }
+          if (typeof firstInvalidEl.scrollIntoView === 'function') {
+            firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+        return;
+      }
 
       // Assegura que o lead_id existe e é preservado em retentativas
       const leadId = getOrCreateLeadId();
@@ -379,19 +464,18 @@ const WHATSAPP_NUMBER = '5562999940769';
       const consentStatus = getConsentStatus();
       updateHiddenConsentFields();
 
-      // Recupera dados do simulador
-      const simData = (window.simuladorEstado) || {};
-      const tipoSelected = document.querySelector('[data-tipo-btn].is-selected');
-      const tipoNome = tipoSelected ? (tipoSelected.querySelector('.jd-sim-tipo-btn__name') || {}).textContent.trim() : (simData.tipoNome || 'Câmara fria resfriados (+10 a 0 °C)');
-
+      // Recupera dados preenchidos
+      const tipoNome = tipoSelected ? (tipoSelected.querySelector('.jd-sim-tipo-btn__name') || {}).textContent.trim() : '';
       const nomeVal = (nomeInp ? nomeInp.value : '').trim();
       const whatsappVal = (waInp ? waInp.value : '').trim();
       const cidadeVal = (cidInp ? cidInp.value : '').trim();
-      const ufVal = (ufInp ? ufInp.value : 'SP').trim();
-      const armazenarVal = (armInp ? armInp.value : 'Carnes e aves').trim();
-      const compVal = inpC ? inpC.value : (simData.comprimento || '3.0');
-      const largVal = inpL ? inpL.value : (simData.largura || '2.5');
-      const altVal = inpA ? inpA.value : (simData.altura || '2.8');
+      const ufVal = (ufInp ? ufInp.value : '').trim();
+      const armazenarVal = (armInp ? armInp.value : '').trim();
+
+      // Medidas vazias vão como string vazia no payload
+      const compVal = (inpC && inpC.value.trim() !== '') ? inpC.value.trim() : '';
+      const largVal = (inpL && inpL.value.trim() !== '') ? inpL.value.trim() : '';
+      const altVal = (inpA && inpA.value.trim() !== '') ? inpA.value.trim() : '';
 
       const timestampEnvio = getIsoTimestampSaoPaulo();
       const timestampInput = document.getElementById('lp-field-timestamp_envio');
@@ -423,7 +507,7 @@ const WHATSAPP_NUMBER = '5562999940769';
         gbraid: currentAttrib.gbraid || '',
         wbraid: currentAttrib.wbraid || '',
         landing_page: window.location.href,
-        lp_version: 'A',
+        lp_version: 'B',
         titulo_variante: activeVariantKey,
         consent_ads: consentStatus.ads,
         consent_analytics: consentStatus.analytics
@@ -432,7 +516,7 @@ const WHATSAPP_NUMBER = '5562999940769';
       const isDebug = new URLSearchParams(window.location.search).get('debug') === '1';
 
       if (isDebug) {
-        console.group('🔍 [LP Debug Mode] Webhook Payload & Attribution');
+        console.group('🔍 [LP Debug Mode] Webhook Payload & Attribution (lp_version: B)');
         console.log('Webhook Payload (28 campos):', payload);
         console.log('Objeto jd_attrib:', currentAttrib);
         console.groupEnd();
@@ -469,7 +553,7 @@ const WHATSAPP_NUMBER = '5562999940769';
           if (btnSubmit) {
             btnSubmit.disabled = false;
             btnSubmit.classList.remove('is-loading');
-            btnSubmit.innerHTML = '<span>Calcular e Receber Meu Orçamento</span>';
+            btnSubmit.innerHTML = '<span>Receber Meu Orçamento</span>';
           }
           if (submitErrorWrap) {
             submitErrorWrap.classList.add('is-visible');
@@ -502,7 +586,7 @@ const WHATSAPP_NUMBER = '5562999940769';
         tipo_camara: tipoCamara,
         armazenar: armazenar,
         uf: uf,
-        lp_version: 'A',
+        lp_version: 'B',
         titulo_variante: activeVariantKey,
         user_data: {
           phone_number: normalizedPhone
@@ -524,12 +608,12 @@ const WHATSAPP_NUMBER = '5562999940769';
         const ref = generateWhatsAppRef();
         const consentStatus = getConsentStatus();
 
-        // Obtém o texto base do simulador ou fallback
+        // Obtém o texto base do formulário ou fallback
         let baseMsg = '';
         if (typeof window.getSimuladorWhatsAppMessage === 'function') {
           baseMsg = window.getSimuladorWhatsAppMessage();
         } else {
-          baseMsg = 'Olá! Vim pelo site e quero um orçamento de câmara fria.';
+          baseMsg = 'Olá! Gostaria de receber um orçamento de câmara fria da JD.';
         }
 
         // Limpa sufixo ref anterior caso existisse e insere o ref atual
@@ -554,7 +638,7 @@ const WHATSAPP_NUMBER = '5562999940769';
           gbraid: currentAttrib.gbraid || '',
           wbraid: currentAttrib.wbraid || '',
           landing_page: window.location.href,
-          lp_version: 'A',
+          lp_version: 'B',
           titulo_variante: activeVariantKey,
           consent_ads: consentStatus.ads,
           consent_analytics: consentStatus.analytics
@@ -581,7 +665,7 @@ const WHATSAPP_NUMBER = '5562999940769';
           event: 'click_whatsapp',
           origem: origem,
           ref: ref,
-          lp_version: 'A',
+          lp_version: 'B',
           titulo_variante: activeVariantKey
         });
 
@@ -602,7 +686,7 @@ const WHATSAPP_NUMBER = '5562999940769';
     });
   }
 
-  // 11. DEMAIS CTAS DA PÁGINA (Scroll Suave até o Simulador)
+  // 11. DEMAIS CTAS DA PÁGINA (Scroll Suave até o Formulário)
   function initHeaderAndNavCtas() {
     const ctas = document.querySelectorAll('[data-cta-simular]');
     ctas.forEach(function (btn) {
@@ -693,7 +777,7 @@ const WHATSAPP_NUMBER = '5562999940769';
           event: 'consent_update',
           consent_analytics: data.analytics,
           consent_ads: data.ads,
-          lp_version: 'A'
+          lp_version: 'B'
         });
       }
 
