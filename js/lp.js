@@ -31,11 +31,11 @@ const WHATSAPP_NUMBER = '5562999940769';
       sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
     },
     congelados: {
-      h1: 'Câmara de congelados (-18 °C) sob medida, com instalação pela JD',
+      h1: 'Câmara de congelados (-10 a -18 °C) sob medida, com instalação pela JD',
       sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
     },
     resfriados: {
-      h1: 'Câmara de resfriados (0 a +15 °C) sob medida, com instalação pela JD',
+      h1: 'Câmara fria resfriados (+10 a 0 °C) sob medida, com instalação pela JD',
       sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
     }
   };
@@ -538,9 +538,9 @@ const WHATSAPP_NUMBER = '5562999940769';
     // CTAs da Dobra 3 (Produtos)
     const PRODUTO_MAP = {
       'mini': 'Mini câmara',
-      'expositora': 'Câmara expositora (walk-in cooler)',
-      'resfriados': 'Câmara de resfriados (0 a +15 °C)',
-      'congelados': 'Câmara de congelados (-18 °C)'
+      'expositora': 'Câmara fria expositora (0 a -5 °C)',
+      'resfriados': 'Câmara fria resfriados (+10 a 0 °C)',
+      'congelados': 'Câmara de congelados (-10 a -18 °C)'
     };
 
     const cardCtas = document.querySelectorAll('[data-cta-produto]');

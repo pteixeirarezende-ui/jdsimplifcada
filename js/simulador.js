@@ -16,7 +16,7 @@
 
   const estado = {
     tipo: 'resfriados',
-    tipoNome: 'Câmara de resfriados (0 a +15 °C)',
+    tipoNome: 'Câmara fria resfriados (+10 a 0 °C)',
     comprimento: 3.0,
     largura: 2.5,
     altura: 2.8,
@@ -37,17 +37,17 @@
       hpPerM3: 0.08
     },
     expositora: {
-      nome: 'Câmara expositora (walk-in cooler)',
+      nome: 'Câmara fria expositora (0 a -5 °C)',
       baseHp: 1.5,
       hpPerM3: 0.10
     },
     resfriados: {
-      nome: 'Câmara de resfriados (0 a +15 °C)',
+      nome: 'Câmara fria resfriados (+10 a 0 °C)',
       baseHp: 1.0,
       hpPerM3: 0.08
     },
     congelados: {
-      nome: 'Câmara de congelados (-18 °C)',
+      nome: 'Câmara de congelados (-10 a -18 °C)',
       baseHp: 1.5,
       hpPerM3: 0.13
     },
