@@ -11,8 +11,8 @@
   // Endpoint do Webhook de Produção / n8n
   const LEAD_ENDPOINT = 'https://n8n-n8n.6djmf0.easypanel.host/webhook-test/b7874717-cc4b-495a-b3cb-322f3f972153';
 
-  // Configuração opcional de WhatsApp
-  const WHATSAPP_NUM = ''; // TODO: inserir número oficial se houver (ex: 5532999999999)
+  // Configuração oficial de WhatsApp da JD
+  const WHATSAPP_NUM = '5562999940769';
 
   const estado = {
     tipo: 'resfriados',

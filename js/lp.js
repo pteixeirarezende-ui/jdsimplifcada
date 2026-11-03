@@ -11,7 +11,7 @@ const PRIVACY_URL = 'https://www.facebook.com/privacy/policy/?locale=pt_BR';
 const LEAD_ENDPOINT = 'https://n8n-n8n.6djmf0.easypanel.host/webhook-test/b7874717-cc4b-495a-b3cb-322f3f972153';
 
 // Número de WhatsApp da JD
-const WHATSAPP_NUMBER = ''; // TODO: preencher com DDI+DDD+número (ex.: 5532999999999)
+const WHATSAPP_NUMBER = '5562999940769';
 
 (function () {
   'use strict';
