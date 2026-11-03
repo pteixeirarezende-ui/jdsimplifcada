@@ -358,6 +358,45 @@
   display: block;
 }
 
+/* Bloco de Erro de Envio */
+.jd-sim-error-box {
+  display: none;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: var(--jd-radius);
+  background: rgba(220, 38, 38, 0.12);
+  border: 1.5px solid rgba(220, 38, 38, 0.45);
+  color: var(--jd-branco);
+  text-align: left;
+}
+
+.jd-sim-error-box.is-visible {
+  display: block;
+  animation: jd-sim-pop 0.3s ease;
+}
+
+.jd-sim-error-box__title {
+  font-family: var(--jd-font-display);
+  font-size: var(--jd-text-base);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #ff6b6b;
+  margin-bottom: 6px;
+}
+
+.jd-sim-error-box__desc {
+  font-size: var(--jd-text-sm);
+  color: var(--jd-cinza-aco);
+  margin-bottom: 14px;
+  line-height: var(--jd-lh-body);
+}
+
+.jd-sim-error-box__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 @keyframes jd-sim-pop {
   from { opacity: 0; transform: scale(0.96); }
   to   { opacity: 1; transform: scale(1); }

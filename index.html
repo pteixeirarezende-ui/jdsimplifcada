@@ -128,6 +128,26 @@
                   <label for="sim-honeypot-field">Não preencha este campo:</label>
                   <input type="text" id="sim-honeypot-field" name="b_website" tabindex="-1" autocomplete="off">
                 </div>
+
+                <!-- Campos Ocultos de Rastreamento, Atribuição e Consentimento (Prompt 08) -->
+                <input type="hidden" id="lp-field-lead_id" name="lead_id" value="">
+                <input type="hidden" id="lp-field-utm_source" name="utm_source" value="">
+                <input type="hidden" id="lp-field-utm_medium" name="utm_medium" value="">
+                <input type="hidden" id="lp-field-utm_campaign" name="utm_campaign" value="">
+                <input type="hidden" id="lp-field-utm_term" name="utm_term" value="">
+                <input type="hidden" id="lp-field-utm_content" name="utm_content" value="">
+                <input type="hidden" id="lp-field-matchtype" name="matchtype" value="">
+                <input type="hidden" id="lp-field-device" name="device" value="">
+                <input type="hidden" id="lp-field-network" name="network" value="">
+                <input type="hidden" id="lp-field-gclid" name="gclid" value="">
+                <input type="hidden" id="lp-field-gbraid" name="gbraid" value="">
+                <input type="hidden" id="lp-field-wbraid" name="wbraid" value="">
+                <input type="hidden" id="lp-field-landing_page" name="landing_page" value="">
+                <input type="hidden" id="lp-field-lp_version" name="lp_version" value="A">
+                <input type="hidden" id="lp-field-titulo_variante" name="titulo_variante" value="padrao">
+                <input type="hidden" id="lp-field-timestamp_envio" name="timestamp_envio" value="">
+                <input type="hidden" id="lp-field-consent_ads" name="consent_ads" value="pending">
+                <input type="hidden" id="lp-field-consent_analytics" name="consent_analytics" value="pending">
                 
                 <!-- 1. TIPO DE CÂMARA -->
                 <div class="jd-sim-section">
@@ -288,6 +308,18 @@
                   Sem compromisso. Seus dados são utilizados exclusivamente para o envio do orçamento.
                 </p>
 
+                <!-- BLOCO DE ERRO DE ENVIO (Prompt 08) -->
+                <div class="jd-sim-error-box" id="lp-submit-error" role="alert" aria-live="assertive">
+                  <div class="jd-sim-error-box__title">Não foi possível enviar sua simulação</div>
+                  <div class="jd-sim-error-box__desc">
+                    Houve uma instabilidade temporária na conexão. Você pode tentar novamente ou falar diretamente com nossos consultores no WhatsApp.
+                  </div>
+                  <div class="jd-sim-error-box__actions">
+                    <button type="button" class="jd-btn jd-btn--primary" id="lp-btn-retry">Tentar de novo</button>
+                    <a href="#" class="jd-btn jd-btn--whatsapp" id="lp-wa-error-btn" data-whatsapp-btn="erro">Falar no WhatsApp</a>
+                  </div>
+                </div>
+
               </form>
             </div>
 
@@ -302,7 +334,7 @@
               <p style="font-size:14px;color:var(--jd-cinza-aco);margin-bottom:20px;max-width:540px;margin-left:auto;margin-right:auto;line-height:1.5;">
                 Nossos consultores técnicos receberam suas medidas e já estão preparando o projeto da sua câmara fria. Entraremos em contato pelo seu WhatsApp.
               </p>
-              <a href="#" class="jd-btn jd-btn--whatsapp" id="sim-succ-wa-btn" style="display:inline-flex;padding:12px 24px;">
+              <a href="#" class="jd-btn jd-btn--whatsapp" id="sim-succ-wa-btn" data-whatsapp-btn="sucesso" style="display:inline-flex;padding:12px 24px;">
                 <span>Falar Agora no WhatsApp com a JD</span>
                 <span aria-hidden="true">→</span>
               </a>
@@ -352,7 +384,7 @@
   <!-- ==========================================================================
        8. BOTÃO FLUTUANTE DE WHATSAPP (ATIVADO APENAS APÓS O CADASTRO)
        ========================================================================== -->
-  <a href="#" class="jd-whatsapp-floating" id="sim-floating-wa" aria-label="Falar com consultor pelo WhatsApp" target="_blank" rel="noopener" style="display:none;position:fixed;bottom:24px;right:24px;z-index:998;background:var(--jd-verde);color:var(--jd-branco);padding:12px 18px;border-radius:var(--jd-radius-pill);align-items:center;gap:10px;text-decoration:none;font-weight:700;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.2);">
+  <a href="#" class="jd-whatsapp-floating" id="sim-floating-wa" data-whatsapp-btn="cta_final" aria-label="Falar com consultor pelo WhatsApp" target="_blank" rel="noopener" style="display:none;position:fixed;bottom:24px;right:24px;z-index:998;background:var(--jd-verde);color:var(--jd-branco);padding:12px 18px;border-radius:var(--jd-radius-pill);align-items:center;gap:10px;text-decoration:none;font-weight:700;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.2);">
     <span class="jd-whatsapp-icon-wrap" aria-hidden="true" style="margin:0;">
       <span class="jd-radar-ring"></span>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--jd-branco);position:relative;z-index:2;">

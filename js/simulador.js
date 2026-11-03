@@ -118,38 +118,28 @@
 
   // Gera texto para o WhatsApp com todos os dados
   function getWhatsAppMessage() {
-    return encodeURIComponent(
-      'Olá! Fiz a simulação de câmara fria na JD e gostaria de receber a proposta oficial:\n\n' +
+    return 'Olá! Fiz a simulação de câmara fria na JD e gostaria de receber a proposta oficial:\n\n' +
       '❄ *Tipo:* ' + estado.tipoNome + '\n' +
       '📐 *Medidas:* ' + estado.comprimento.toFixed(1) + 'm (C) × ' + estado.largura.toFixed(1) + 'm (L) × ' + estado.altura.toFixed(1) + 'm (A)\n' +
       '📦 *Volume:* ' + estado.volume.toFixed(1) + ' m³ (' + estado.area + ' m² de painéis)\n' +
       '🥩 *Produto:* ' + estado.armazenar + '\n' +
       (estado.cidade ? '📍 *Local:* ' + estado.cidade + ' - ' + estado.uf + '\n' : '') +
       (estado.nome ? '👤 *Nome:* ' + estado.nome + '\n' : '') +
-      '\nPoderiam me enviar o orçamento com valores de fábrica e prazo?'
-    );
+      '\nPoderiam me enviar o orçamento com valores de fábrica e prazo?';
   }
 
   function updateWhatsAppLinks() {
-    const msg = getWhatsAppMessage();
+    const msg = encodeURIComponent(getWhatsAppMessage());
     const waUrl = WHATSAPP_NUM ? ('https://wa.me/' + WHATSAPP_NUM + '?text=' + msg) : ('https://wa.me/?text=' + msg);
 
     const btnSuccWa = document.getElementById('sim-succ-wa-btn');
     if (btnSuccWa) {
       btnSuccWa.href = waUrl;
-      btnSuccWa.target = '_blank';
-      btnSuccWa.onclick = function (e) {
-        e.stopPropagation();
-      };
     }
 
     const btnFloatWa = document.getElementById('sim-floating-wa');
     if (btnFloatWa) {
       btnFloatWa.href = waUrl;
-      btnFloatWa.target = '_blank';
-      btnFloatWa.onclick = function (e) {
-        e.stopPropagation();
-      };
     }
   }
 
@@ -238,119 +228,10 @@
       });
     }
 
-    // 5. Submissão do Formulário com Proteção Anti-Spam e Duplo Envio
-    const form = document.getElementById('jd-sim-direto-form');
-    if (form) {
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        // Honeypot Anti-Spam
-        const honey = document.getElementById('sim-honeypot-field');
-        if (honey && honey.value.trim() !== '') {
-          // Descarte silencioso de bots
-          showSucesso();
-          return;
-        }
-
-        let hasError = false;
-
-        // Validação Nome
-        if (!nomeInp || nomeInp.value.trim().length < 3) {
-          if (nomeInp) {
-            nomeInp.classList.add('is-invalid');
-            nomeInp.focus();
-          }
-          hasError = true;
-        }
-
-        // Validação WhatsApp
-        const waDigits = (waInp ? waInp.value : '').replace(/\D/g, '');
-        if (waDigits.length < 10) {
-          if (waInp) {
-            waInp.classList.add('is-invalid');
-            if (!hasError) waInp.focus();
-          }
-          hasError = true;
-        }
-
-        // Validação Cidade
-        if (!inpCidade || inpCidade.value.trim().length < 2) {
-          if (inpCidade) {
-            inpCidade.classList.add('is-invalid');
-            if (!hasError) inpCidade.focus();
-          }
-          hasError = true;
-        }
-
-        if (hasError) return;
-
-        estado.nome = sanitize(nomeInp.value);
-        estado.whatsapp = sanitize(waInp.value);
-        estado.cidade = sanitize(inpCidade ? inpCidade.value : '');
-
-        const btnSubmit = document.getElementById('sim-btn-submit');
-        if (btnSubmit) {
-          btnSubmit.disabled = true;
-          btnSubmit.textContent = 'Enviando Orçamento...';
-        }
-
-        const urlParams = new URLSearchParams(window.location.search);
-        function getTrack(key) {
-          return urlParams.get(key) || sessionStorage.getItem('jd_lead_' + key) || '';
-        }
-
-        const payload = {
-          origem: 'simulador_direto',
-          nome: estado.nome,
-          whatsapp: estado.whatsapp,
-          tipo: estado.tipoNome,
-          comprimento: estado.comprimento,
-          largura: estado.largura,
-          altura: estado.altura,
-          volume_m3: estado.volume,
-          area_m2: estado.area,
-          potencia_hp: estado.potenciaHp,
-          armazenar: estado.armazenar,
-          cidade: estado.cidade,
-          uf: estado.uf,
-          utm_source: getTrack('utm_source'),
-          utm_medium: getTrack('utm_medium'),
-          utm_campaign: getTrack('utm_campaign'),
-          utm_content: getTrack('utm_content'),
-          utm_term: getTrack('utm_term'),
-          timestamp: new Date().toISOString()
-        };
-
-        if (window.dataLayer) {
-          window.dataLayer.push({
-            event: 'lead_simulador_direto',
-            lead_nome: estado.nome,
-            lead_whatsapp: estado.whatsapp,
-            sim_tipo: estado.tipoNome,
-            sim_volume: estado.volume
-          });
-        }
-
-        const endpoint = LEAD_ENDPOINT || window.LEAD_ENDPOINT || '';
-        if (endpoint) {
-          fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          })
-            .catch(function (err) {
-              console.warn('Erro ao disparar webhook do formulário:', err);
-            })
-            .finally(function () {
-              showSucesso();
-            });
-        } else {
-          setTimeout(function () {
-            showSucesso();
-          }, 350);
-        }
-      });
-    }
+    // Exporta estado e helpers para o motor unificado em lp.js (Prompt 08)
+    window.simuladorEstado = estado;
+    window.getSimuladorWhatsAppMessage = getWhatsAppMessage;
+    window.showSimuladorSucesso = showSucesso;
 
     function showSucesso() {
       const formCard = document.getElementById('sim-form-body');

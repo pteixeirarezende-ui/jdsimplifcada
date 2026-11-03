@@ -66,20 +66,25 @@
   left: -150%;
   width: 60%;
   height: 200%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.45) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.45) 50%,
+      transparent 100%);
   transform: rotate(25deg);
   pointer-events: none;
   animation: jd-laser-sweep 4.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes jd-laser-sweep {
-  0%, 70% { left: -150%; }
-  100%    { left: 250%; }
+
+  0%,
+  70% {
+    left: -150%;
+  }
+
+  100% {
+    left: 250%;
+  }
 }
 
 .jd-btn--primary:hover::after,
@@ -134,10 +139,12 @@
     transform: scale(0.65);
     opacity: 0.85;
   }
+
   70% {
     transform: scale(1.65);
     opacity: 0.15;
   }
+
   100% {
     transform: scale(1.9);
     opacity: 0;
@@ -158,8 +165,17 @@
 }
 
 @keyframes jd-led-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.45; transform: scale(0.85); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
 }
 
 /* Cantoneiras Industriais de Reforço */
@@ -214,11 +230,9 @@
   inset: -1px;
   border-radius: inherit;
   padding: 1px;
-  background: radial-gradient(
-    320px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(55, 180, 206, 0.45) 0%,
-    transparent 65%
-  );
+  background: radial-gradient(320px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(55, 180, 206, 0.45) 0%,
+      transparent 65%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -1024,9 +1038,9 @@
     gap: var(--jd-space-4);
   }
 
-  .lp-cookie-banner__main > div:first-child,
-  .lp-cookie-banner__main > p,
-  .lp-cookie-banner__main > h2 {
+  .lp-cookie-banner__main>div:first-child,
+  .lp-cookie-banner__main>p,
+  .lp-cookie-banner__main>h2 {
     flex: 1;
   }
 }
@@ -1035,6 +1049,7 @@
    11. ACESSIBILIDADE & PREFERS-REDUCED-MOTION
    ==================================================================== */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
