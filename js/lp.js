@@ -411,10 +411,10 @@ const WHATSAPP_NUMBER = '5562999940769';
         hasError = true;
       }
 
-      // 7. Validação Medidas opcionais (Ordem visual 5: se preenchidas, devem estar na faixa válida)
+      // 7. Validação Medidas opcionais (Ordem visual 5: aceita qualquer tamanho; se preenchido, valida apenas número positivo)
       if (inpC && inpC.value.trim() !== '') {
-        const cVal = parseFloat(inpC.value);
-        if (isNaN(cVal) || cVal < 1.0 || cVal > 30.0) {
+        const cVal = parseFloat(inpC.value.replace(',', '.'));
+        if (isNaN(cVal) || cVal <= 0) {
           inpC.classList.add('is-invalid');
           if (!firstInvalidEl) firstInvalidEl = inpC;
           hasError = true;
@@ -422,8 +422,8 @@ const WHATSAPP_NUMBER = '5562999940769';
       }
 
       if (inpL && inpL.value.trim() !== '') {
-        const lVal = parseFloat(inpL.value);
-        if (isNaN(lVal) || lVal < 1.0 || lVal > 25.0) {
+        const lVal = parseFloat(inpL.value.replace(',', '.'));
+        if (isNaN(lVal) || lVal <= 0) {
           inpL.classList.add('is-invalid');
           if (!firstInvalidEl) firstInvalidEl = inpL;
           hasError = true;
@@ -431,8 +431,8 @@ const WHATSAPP_NUMBER = '5562999940769';
       }
 
       if (inpA && inpA.value.trim() !== '') {
-        const aVal = parseFloat(inpA.value);
-        if (isNaN(aVal) || aVal < 1.5 || aVal > 8.0) {
+        const aVal = parseFloat(inpA.value.replace(',', '.'));
+        if (isNaN(aVal) || aVal <= 0) {
           inpA.classList.add('is-invalid');
           if (!firstInvalidEl) firstInvalidEl = inpA;
           hasError = true;

@@ -49,9 +49,9 @@
 
   // Recalcula volume somente se todas as medidas estiverem preenchidas
   function updateVolume() {
-    const c = parseFloat(estado.comprimento);
-    const l = parseFloat(estado.largura);
-    const a = parseFloat(estado.altura);
+    const c = parseFloat(String(estado.comprimento).replace(',', '.'));
+    const l = parseFloat(String(estado.largura).replace(',', '.'));
+    const a = parseFloat(String(estado.altura).replace(',', '.'));
 
     if (!isNaN(c) && !isNaN(l) && !isNaN(a) && c > 0 && l > 0 && a > 0) {
       estado.volume = (c * l * a).toFixed(1);
@@ -70,9 +70,9 @@
       msg += '❄ *Tipo:* ' + estado.tipoNome + '\n';
     }
 
-    const c = parseFloat(estado.comprimento);
-    const l = parseFloat(estado.largura);
-    const a = parseFloat(estado.altura);
+    const c = parseFloat(String(estado.comprimento).replace(',', '.'));
+    const l = parseFloat(String(estado.largura).replace(',', '.'));
+    const a = parseFloat(String(estado.altura).replace(',', '.'));
 
     if (!isNaN(c) && !isNaN(l) && !isNaN(a) && c > 0 && l > 0 && a > 0) {
       const vol = (c * l * a).toFixed(1).replace('.', ',');
