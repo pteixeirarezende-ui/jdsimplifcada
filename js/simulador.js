@@ -26,9 +26,9 @@
 
   const TIPO_NOMES = {
     mini: 'Mini câmara',
-    expositora: 'Câmara fria expositora (0 a -5 °C)',
-    resfriados: 'Câmara fria resfriados (+10 a 0 °C)',
-    congelados: 'Câmara de congelados (-10 a -18 °C)',
+    expositora: 'Câmara expositora (walk-in cooler)',
+    resfriados: 'Câmara de resfriados (0 a +15 °C)',
+    congelados: 'Câmara de congelados (-18 °C)',
     indefinido: 'Ainda não sei'
   };
 

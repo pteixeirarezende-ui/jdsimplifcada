@@ -32,11 +32,11 @@ const WHATSAPP_NUMBER = '5562999940769';
       sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
     },
     congelados: {
-      h1: 'Câmara de congelados (-10 a -18 °C) sob medida, com instalação pela JD',
+      h1: 'Câmara de congelados (-18 °C) sob medida, com instalação pela JD',
       sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
     },
     resfriados: {
-      h1: 'Câmara fria resfriados (+10 a 0 °C) sob medida, com instalação pela JD',
+      h1: 'Câmara de resfriados (0 a +15 °C) sob medida, com instalação pela JD',
       sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
     }
   };
@@ -312,17 +312,12 @@ const WHATSAPP_NUMBER = '5562999940769';
       }
     }
 
-    // Tentar de novo após erro de envio (preserva o mesmo lead_id)
+    // Tentar de novo após erro de envio: reenvia com o MESMO lead_id
     if (btnRetry) {
       btnRetry.addEventListener('click', function (e) {
         e.preventDefault();
         if (submitErrorWrap) submitErrorWrap.classList.remove('is-visible');
-        if (btnSubmit) {
-          btnSubmit.disabled = false;
-          btnSubmit.classList.remove('is-loading');
-          btnSubmit.innerHTML = '<span>Receber Meu Orçamento</span>';
-          btnSubmit.focus();
-        }
+        handleFormSubmit();
       });
     }
 
@@ -359,9 +354,9 @@ const WHATSAPP_NUMBER = '5562999940769';
     });
 
     function handleFormSubmit() {
-      // Honeypot anti-spam (descarte silencioso)
+      // Honeypot anti-spam (descarte silencioso: interface de sucesso, SEM post e SEM dataLayer)
       if (honeypot && honeypot.value.trim() !== '') {
-        showSuccessView('Câmara fria', 'Outro produto', 'SP', '5511999999999');
+        showSuccessUI();
         return;
       }
 
@@ -562,7 +557,7 @@ const WHATSAPP_NUMBER = '5562999940769';
         });
     }
 
-    function showSuccessView(tipoCamara, armazenar, uf, rawPhone) {
+    function showSuccessUI() {
       if (submitErrorWrap) submitErrorWrap.classList.remove('is-visible');
 
       if (typeof window.showSimuladorSucesso === 'function') {
@@ -576,6 +571,10 @@ const WHATSAPP_NUMBER = '5562999940769';
         if (floatWa) floatWa.style.display = 'inline-flex';
         if (succBox) succBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
+    }
+
+    function showSuccessView(tipoCamara, armazenar, uf, rawPhone) {
+      showSuccessUI();
 
       // Dispara lead_form_submit SOMENTE após resposta 2xx confirmada
       const normalizedPhone = normalizePhoneE164(rawPhone);
@@ -624,6 +623,7 @@ const WHATSAPP_NUMBER = '5562999940769';
         const waPayload = {
           tipo_evento: 'click_whatsapp',
           ref: ref,
+          lead_id: currentLeadId || '',
           origem: origem,
           timestamp_envio: getIsoTimestampSaoPaulo(),
           utm_source: currentAttrib.utm_source || '',
@@ -665,6 +665,7 @@ const WHATSAPP_NUMBER = '5562999940769';
           event: 'click_whatsapp',
           origem: origem,
           ref: ref,
+          lead_id: currentLeadId || '',
           lp_version: 'B',
           titulo_variante: activeVariantKey
         });

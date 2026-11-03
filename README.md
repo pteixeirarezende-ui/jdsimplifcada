@@ -182,3 +182,20 @@ Medições coletadas via Chrome Headless oficial nos 4 viewports exigidos:
    - Decisão salva em `jd_consent_v1` atualizada antes do carregamento do GTM.
 2. **Banner Acessível:**
    - Compatível com WAI-ARIA, foco visível e alvos de toque ≥ 44px.
+
+---
+
+## 🎯 Verificação 10 — Tracking & Tipos de Câmaras
+
+1. **Honeypot preenchido:** 0 POST, 0 eventos no dataLayer (`lead_form_submit` não disparado), tela de sucesso exibida silenciosamente para o bot.
+2. **Envio real (2xx):** 1 POST com webhook e 1 disparo de `lead_form_submit` com payload e dados de atribuição.
+3. **Clique no WhatsApp:**
+   - Tela de sucesso: `lead_id` no ping do webhook e no evento `click_whatsapp` coincide com o id do lead submetido.
+   - Antes do envio (ou erro antes do submit): `lead_id` enviado como `''` (string vazia).
+4. **"Tentar de novo":** Reenvia o formulário reutilizando o mesmo `lead_id`. Se a primeira tentativa retornar 500 e a segunda 200, ocorrem 2 POSTs com o mesmo `lead_id` e o `lead_form_submit` dispara apenas na resposta 2xx.
+5. **Opções de Tipos de Câmaras Atualizadas:**
+   - Mini câmara
+   - Câmara expositora (walk-in cooler)
+   - Câmara de resfriados (0 a +15 °C)
+   - Câmara de congelados (-18 °C)
+   - Ainda não sei
