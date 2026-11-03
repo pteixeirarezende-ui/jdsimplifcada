@@ -9,7 +9,7 @@
 const PRIVACY_URL = 'https://www.facebook.com/privacy/policy/?locale=pt_BR';
 
 // Endpoint de envio do webhook
-const LEAD_ENDPOINT = 'https://n8n-n8n.6djmf0.easypanel.host/webhook-test/b7874717-cc4b-495a-b3cb-322f3f972153';
+const LEAD_ENDPOINT = 'https://n8n-n8n.6djmf0.easypanel.host/webhook/b7874717-cc4b-495a-b3cb-322f3f972153';
 
 // Número de WhatsApp oficial da JD
 const WHATSAPP_NUMBER = '5562999940769';
