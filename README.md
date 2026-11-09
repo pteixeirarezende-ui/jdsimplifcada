@@ -199,3 +199,11 @@ Medições coletadas via Chrome Headless oficial nos 4 viewports exigidos:
    - Câmara de resfriados (0 a +15 °C)
    - Câmara de congelados (-18 °C)
    - Ainda não sei
+
+---
+
+## 📋 Ajustes de Envio de Leads & Timestamp
+
+1. **Validação de Contato Obrigatória:** O formulário só envia se o lead preencher Nome Completo (mínimo 3 caracteres) e WhatsApp (mínimo 10 dígitos com DDD). Se vazios, o envio é impedido e os campos são sinalizados (`is-invalid`).
+2. **Eliminação de Leads Vazios no Webhook:** Removido o disparo de webhook HTTP no clique de botões de WhatsApp (que estava criando linhas em branco na planilha). O rastreamento de cliques no WhatsApp continua ativo no `dataLayer` (`click_whatsapp`).
+3. **Timestamp do Cadastro no Webhook:** O payload do webhook agora envia explicitamente `timestamp`, `timestamp_cadastro`, `timestamp_envio`, `data_cadastro` (formato brasileiro DD/MM/AAAA HH:mm:ss), `data_hora`, `data`, `hora` e `created_at`.

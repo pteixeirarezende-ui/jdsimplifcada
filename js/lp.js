@@ -275,6 +275,24 @@ const WHATSAPP_NUMBER = '5562999940769';
     return yyyy + '-' + MM + '-' + dd + 'T' + HH + ':' + mm + ':' + ss + '.' + ms + '-03:00';
   }
 
+  // Data e hora legível no fuso de São Paulo (DD/MM/AAAA HH:mm:ss)
+  function getFormattedDateTimeSaoPaulo() {
+    const now = new Date();
+    const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const spMs = utcMs - (3 * 3600000); // UTC - 3 hours
+    const spDate = new Date(spMs);
+
+    const pad = function (n, z) { z = z || 2; return ('00' + n).slice(-z); };
+    const yyyy = spDate.getFullYear();
+    const MM = pad(spDate.getMonth() + 1);
+    const dd = pad(spDate.getDate());
+    const HH = pad(spDate.getHours());
+    const mm = pad(spDate.getMinutes());
+    const ss = pad(spDate.getSeconds());
+
+    return dd + '/' + MM + '/' + yyyy + ' ' + HH + ':' + mm + ':' + ss;
+  }
+
   // 8. CÓDIGO DE REFERÊNCIA WHATSAPP (ref)
   function generateWhatsAppRef() {
     if (leadSubmittedSuccessfully && currentLeadId) {
@@ -363,55 +381,25 @@ const WHATSAPP_NUMBER = '5562999940769';
       let hasError = false;
       let firstInvalidEl = null;
 
-      // 1. Validação Tipo de Câmara (Ordem visual 1)
-      const tipoSelected = document.querySelector('[data-tipo-btn].is-selected');
-      if (!tipoSelected) {
-        if (tipoErrorEl) tipoErrorEl.classList.add('is-visible');
-        if (!firstInvalidEl) {
-          firstInvalidEl = document.querySelector('[data-tipo-btn]') || tipoErrorEl;
-        }
-        hasError = true;
-      } else if (tipoErrorEl) {
-        tipoErrorEl.classList.remove('is-visible');
-      }
+      // 1. Validação Obrigatória: DADOS DE CONTATO (Nome Completo e WhatsApp)
+      // O formulário só envia se o lead preencher as informações pelo menos de contato
+      const nomeVal = (nomeInp ? nomeInp.value : '').trim();
+      const whatsappVal = (waInp ? waInp.value : '').trim();
+      const waDigits = whatsappVal.replace(/\D/g, '');
 
-      // 2. Validação Nome Completo (Ordem visual 2)
-      if (!nomeInp || nomeInp.value.trim().length < 3) {
+      if (!nomeVal || nomeVal.length < 3) {
         if (nomeInp) nomeInp.classList.add('is-invalid');
         if (!firstInvalidEl) firstInvalidEl = nomeInp;
         hasError = true;
       }
 
-      // 3. Validação WhatsApp (Ordem visual 2)
-      const waDigits = (waInp ? waInp.value : '').replace(/\D/g, '');
       if (waDigits.length < 10) {
         if (waInp) waInp.classList.add('is-invalid');
         if (!firstInvalidEl) firstInvalidEl = waInp;
         hasError = true;
       }
 
-      // 4. Validação O que vai armazenar (Ordem visual 3)
-      if (!armInp || !armInp.value) {
-        if (armInp) armInp.classList.add('is-invalid');
-        if (!firstInvalidEl) firstInvalidEl = armInp;
-        hasError = true;
-      }
-
-      // 5. Validação Cidade de instalação (Ordem visual 4)
-      if (!cidInp || cidInp.value.trim().length < 2) {
-        if (cidInp) cidInp.classList.add('is-invalid');
-        if (!firstInvalidEl) firstInvalidEl = cidInp;
-        hasError = true;
-      }
-
-      // 6. Validação Estado UF (Ordem visual 4)
-      if (!ufInp || !ufInp.value) {
-        if (ufInp) ufInp.classList.add('is-invalid');
-        if (!firstInvalidEl) firstInvalidEl = ufInp;
-        hasError = true;
-      }
-
-      // 7. Validação Medidas opcionais (Ordem visual 5: aceita qualquer tamanho; se preenchido, valida apenas número positivo)
+      // 2. Validação Medidas opcionais (se preenchidas, devem ser número positivo)
       if (inpC && inpC.value.trim() !== '') {
         const cVal = parseFloat(inpC.value.replace(',', '.'));
         if (isNaN(cVal) || cVal <= 0) {
@@ -439,7 +427,7 @@ const WHATSAPP_NUMBER = '5562999940769';
         }
       }
 
-      // Se houver erro, rola e foca no primeiro inválido na ordem visual
+      // Se dados de contato ou medidas forem inválidos, impede o envio
       if (hasError) {
         if (firstInvalidEl) {
           if (typeof firstInvalidEl.focus === 'function') {
@@ -452,6 +440,11 @@ const WHATSAPP_NUMBER = '5562999940769';
         return;
       }
 
+      // Barreira estrita: jamais envia se dados de contato não estiverem preenchidos
+      if (!nomeVal || nomeVal.length < 3 || waDigits.length < 10) {
+        return;
+      }
+
       // Assegura que o lead_id existe e é preservado em retentativas
       const leadId = getOrCreateLeadId();
 
@@ -459,13 +452,12 @@ const WHATSAPP_NUMBER = '5562999940769';
       const consentStatus = getConsentStatus();
       updateHiddenConsentFields();
 
-      // Recupera dados preenchidos
-      const tipoNome = tipoSelected ? (tipoSelected.querySelector('.jd-sim-tipo-btn__name') || {}).textContent.trim() : '';
-      const nomeVal = (nomeInp ? nomeInp.value : '').trim();
-      const whatsappVal = (waInp ? waInp.value : '').trim();
+      // Recupera dados preenchidos (com fallback inteligente se preencheu apenas contato)
+      const tipoSelected = document.querySelector('[data-tipo-btn].is-selected');
+      const tipoNome = tipoSelected ? (tipoSelected.querySelector('.jd-sim-tipo-btn__name') || {}).textContent.trim() : 'Ainda não sei';
       const cidadeVal = (cidInp ? cidInp.value : '').trim();
       const ufVal = (ufInp ? ufInp.value : '').trim();
-      const armazenarVal = (armInp ? armInp.value : '').trim();
+      const armazenarVal = (armInp && armInp.value) ? armInp.value.trim() : 'Não informado';
 
       // Medidas vazias vão como string vazia no payload
       const compVal = (inpC && inpC.value.trim() !== '') ? inpC.value.trim() : '';
@@ -473,14 +465,26 @@ const WHATSAPP_NUMBER = '5562999940769';
       const altVal = (inpA && inpA.value.trim() !== '') ? inpA.value.trim() : '';
 
       const timestampEnvio = getIsoTimestampSaoPaulo();
+      const dataHoraCadastro = getFormattedDateTimeSaoPaulo();
       const timestampInput = document.getElementById('lp-field-timestamp_envio');
       if (timestampInput) timestampInput.value = timestampEnvio;
+      const timestampCadastroInput = document.getElementById('lp-field-timestamp_cadastro');
+      if (timestampCadastroInput) timestampCadastroInput.value = timestampEnvio;
+      const timestampStdInput = document.getElementById('lp-field-timestamp');
+      if (timestampStdInput) timestampStdInput.value = timestampEnvio;
 
-      // Monta Payload final do webhook com 28 colunas exatas na ordem estrita solicitada (sem prazo)
+      // Monta Payload final do webhook com garantia de dados de contato e timestamp do cadastro
       const payload = {
         tipo_evento: 'lead_form',
         lead_id: leadId,
+        timestamp: timestampEnvio,
+        timestamp_cadastro: timestampEnvio,
         timestamp_envio: timestampEnvio,
+        data_cadastro: dataHoraCadastro,
+        data_hora: dataHoraCadastro,
+        data: dataHoraCadastro.split(' ')[0],
+        hora: dataHoraCadastro.split(' ')[1],
+        created_at: timestampEnvio,
         nome: nomeVal,
         whatsapp: whatsappVal,
         tipo_camara: tipoNome,
@@ -619,48 +623,15 @@ const WHATSAPP_NUMBER = '5562999940769';
         baseMsg = baseMsg.replace(/\s*\(ref:\s*[A-Z0-9]+\)$/i, '');
         const fullMsg = baseMsg + ' (ref: ' + ref + ')';
 
-        // 3. Registro leve no mesmo webhook (keepalive: true, falha em silêncio)
-        const waPayload = {
-          tipo_evento: 'click_whatsapp',
-          ref: ref,
-          lead_id: currentLeadId || '',
-          origem: origem,
-          timestamp_envio: getIsoTimestampSaoPaulo(),
-          utm_source: currentAttrib.utm_source || '',
-          utm_medium: currentAttrib.utm_medium || '',
-          utm_campaign: currentAttrib.utm_campaign || '',
-          utm_term: currentAttrib.utm_term || '',
-          utm_content: currentAttrib.utm_content || '',
-          matchtype: currentAttrib.matchtype || '',
-          device: currentAttrib.device || '',
-          network: currentAttrib.network || '',
-          gclid: currentAttrib.gclid || '',
-          gbraid: currentAttrib.gbraid || '',
-          wbraid: currentAttrib.wbraid || '',
-          landing_page: window.location.href,
-          lp_version: 'B',
-          titulo_variante: activeVariantKey,
-          consent_ads: consentStatus.ads,
-          consent_analytics: consentStatus.analytics
-        };
-
         if (isDebug) {
-          console.group('🔍 [LP Debug Mode] WhatsApp Click Webhook Ping');
-          console.log('Payload Webhook Click:', waPayload);
+          console.group('🔍 [LP Debug Mode] WhatsApp Click Event');
           console.log('Código ref:', ref);
+          console.log('Origem do clique:', origem);
+          console.log('Lead ID:', currentLeadId || '(antes do form)');
           console.groupEnd();
-        } else if (LEAD_ENDPOINT) {
-          try {
-            fetch(LEAD_ENDPOINT, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(waPayload),
-              keepalive: true
-            }).catch(function () { /* fail silently */ });
-          } catch (err) { /* fail silently */ }
         }
 
-        // 4. dataLayer (1 disparo por clique)
+        // 3. dataLayer (1 disparo por clique para GTM/GA4/Ads — sem envio de webhook vazio)
         window.dataLayer.push({
           event: 'click_whatsapp',
           origem: origem,
