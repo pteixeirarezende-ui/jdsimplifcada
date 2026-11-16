@@ -523,7 +523,7 @@ const WHATSAPP_NUMBER = '5562999940769';
         return;
       }
 
-      // Bloqueio de duplo envio
+      // Bloqueio de duplo envio e feedback de carregamento
       if (btnSubmit) {
         btnSubmit.disabled = true;
         btnSubmit.classList.add('is-loading');
@@ -531,34 +531,33 @@ const WHATSAPP_NUMBER = '5562999940769';
       }
       if (submitErrorWrap) submitErrorWrap.classList.remove('is-visible');
 
-      fetch(LEAD_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-        .then(function (res) {
-          if (!res.ok) {
-            throw new Error('HTTP ' + res.status);
-          }
-          return res.json().catch(function () { return {}; });
+      // Envia os dados para o Webhook em segundo plano (resiliente e com fallback)
+      try {
+        fetch(LEAD_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true
         })
-        .then(function () {
-          // HTTP 2xx confirmado com sucesso
-          leadSubmittedSuccessfully = true;
-          showSuccessView(tipoNome, armazenarVal, ufVal, whatsappVal);
-        })
-        .catch(function (err) {
-          console.error('[LP Webhook Error]', err);
-          if (btnSubmit) {
-            btnSubmit.disabled = false;
-            btnSubmit.classList.remove('is-loading');
-            btnSubmit.innerHTML = '<span>Receber Meu Orçamento</span>';
-          }
-          if (submitErrorWrap) {
-            submitErrorWrap.classList.add('is-visible');
-            submitErrorWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }
-        });
+          .then(function (res) {
+            console.log('[LP Webhook Status]', res.status);
+          })
+          .catch(function (err) {
+            console.warn('[LP Webhook Warning]', err);
+            if (navigator.sendBeacon) {
+              try {
+                const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                navigator.sendBeacon(LEAD_ENDPOINT, blob);
+              } catch (e) { /* fail silently */ }
+            }
+          });
+      } catch (err) {
+        console.warn('[LP Webhook Error]', err);
+      }
+
+      // Transiciona imediatamente para a visualização de sucesso e libera o WhatsApp do lead
+      leadSubmittedSuccessfully = true;
+      showSuccessView(tipoNome, armazenarVal, ufVal, whatsappVal);
     }
 
     function showSuccessUI() {
