@@ -5,8 +5,8 @@
  * Zero dependências externas.
  */
 
-// CONFIRMAR: política de privacidade própria da JD
-const PRIVACY_URL = 'https://www.facebook.com/privacy/policy/?locale=pt_BR';
+// Política de privacidade própria da JD
+const PRIVACY_URL = '/privacidade/';
 
 // Endpoint de envio do webhook
 const LEAD_ENDPOINT = 'https://nazaria-n8n.swwqzp.easypanel.host/webhook/b7874717-cc4b-495a-b3cb-322f3f972153';
@@ -17,54 +17,36 @@ const WHATSAPP_NUMBER = '5562999940769';
 (function () {
   'use strict';
 
-  // 1. TÍTULO DINÂMICO POR PARÂMETRO ?h=
-  const VARIANTS = {
-    preco: {
-      h1: 'Quanto custa a sua câmara fria? Informe as medidas e receba o orçamento da JD',
-      sub: 'Cada câmara é projetada sob medida, então o valor depende do tamanho, da temperatura e do uso. Conte o que você precisa e a JD envia o orçamento.'
-    },
-    mini: {
-      h1: 'Mini câmara fria sob medida para o seu espaço',
-      sub: 'Para quem tem pouco espaço e precisa de frio. Informe o que vai armazenar e as medidas e receba o orçamento da JD.'
-    },
-    walkin: {
-      h1: 'Câmara fria para bebidas: walk-in cooler sob medida, entregue e instalada',
-      sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
-    },
-    congelados: {
-      h1: 'Câmara de congelados (-18 °C) sob medida, com instalação pela JD',
-      sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
-    },
-    resfriados: {
-      h1: 'Câmara de resfriados (0 a +15 °C) sob medida, com instalação pela JD',
-      sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
-    }
-  };
+  // 1. TÍTULO DINÂMICO POR PARÂMETRO ?h= (fonte única: window.JD_VARIANTS no script inline do hero)
+  const VARIANTS = (window.JD_VARIANTS && typeof window.JD_VARIANTS === 'object') ? window.JD_VARIANTS : {};
 
-  const DEFAULT_HEADLINE = {
-    h1: 'Receba o orçamento da sua câmara fria sob medida',
-    sub: 'Informe o que vai armazenar e as medidas do espaço. A JD monta o orçamento e envia pelo WhatsApp.'
-  };
-
-  let activeVariantKey = 'padrao';
+  let activeVariantKey = (typeof window.JD_ACTIVE_VARIANT === 'string' && window.JD_ACTIVE_VARIANT) ? window.JD_ACTIVE_VARIANT : 'padrao';
 
   function applyDynamicHeadline() {
-    const params = new URLSearchParams(window.location.search);
-    const hParam = (params.get('h') || '').toLowerCase().trim();
+    let hParam = '';
+    try {
+      hParam = (new URLSearchParams(window.location.search).get('h') || '').toLowerCase().trim();
+    } catch (e) {
+      hParam = '';
+    }
 
     const h1El = document.getElementById('hero-title');
     const subEl = document.getElementById('hero-subtitle');
     const variantInput = document.getElementById('lp-field-titulo_variante');
 
-    if (hParam && VARIANTS[hParam]) {
+    if (hParam && Object.prototype.hasOwnProperty.call(VARIANTS, hParam)) {
       activeVariantKey = hParam;
-      if (h1El) h1El.textContent = VARIANTS[hParam].h1;
-      if (subEl) subEl.textContent = VARIANTS[hParam].sub;
+      if (h1El && h1El.textContent !== VARIANTS[hParam].h1) {
+        h1El.textContent = VARIANTS[hParam].h1;
+      }
+      if (subEl && subEl.textContent !== VARIANTS[hParam].sub) {
+        subEl.textContent = VARIANTS[hParam].sub;
+      }
     } else {
       activeVariantKey = 'padrao';
-      if (h1El) h1El.textContent = DEFAULT_HEADLINE.h1;
-      if (subEl) subEl.textContent = DEFAULT_HEADLINE.sub;
     }
+
+    window.JD_ACTIVE_VARIANT = activeVariantKey;
 
     if (variantInput) {
       variantInput.value = activeVariantKey;
@@ -1015,6 +997,51 @@ const WHATSAPP_NUMBER = '5562999940769';
       switchEl.setAttribute('aria-checked', current ? 'false' : 'true');
     }
 
+    let bannerMeasureRaf = null;
+    function syncBannerBodySpace() {
+      const isVisible = banner.classList.contains('is-visible');
+      if (isVisible) {
+        document.body.classList.add('has-cookie-banner');
+        const hNow = banner.offsetHeight;
+        if (hNow > 0) {
+          document.body.style.setProperty('--lp-cookie-banner-height', hNow + 'px');
+        }
+        if (bannerMeasureRaf) cancelAnimationFrame(bannerMeasureRaf);
+        bannerMeasureRaf = window.requestAnimationFrame(function () {
+          bannerMeasureRaf = null;
+          if (!banner.classList.contains('is-visible')) return;
+          const h = banner.offsetHeight;
+          if (h > 0) {
+            document.body.style.setProperty('--lp-cookie-banner-height', h + 'px');
+          }
+        });
+      } else {
+        if (bannerMeasureRaf) {
+          cancelAnimationFrame(bannerMeasureRaf);
+          bannerMeasureRaf = null;
+        }
+        document.body.classList.remove('has-cookie-banner');
+        document.body.style.removeProperty('--lp-cookie-banner-height');
+      }
+    }
+
+    function showBanner() {
+      banner.classList.add('is-visible');
+      syncBannerBodySpace();
+    }
+
+    function hideBanner() {
+      if (panel) {
+        panel.setAttribute('hidden', '');
+      }
+      if (btnCustomize) {
+        btnCustomize.setAttribute('aria-expanded', 'false');
+      }
+      banner.classList.remove('is-expanded');
+      banner.classList.remove('is-visible');
+      syncBannerBodySpace();
+    }
+
     function openCustomPanel() {
       const consent = getConsentStatus();
       const analyticsVal = consent.analytics === 'granted';
@@ -1027,7 +1054,8 @@ const WHATSAPP_NUMBER = '5562999940769';
       if (btnCustomize) {
         btnCustomize.setAttribute('aria-expanded', 'true');
       }
-      banner.classList.add('is-visible');
+      banner.classList.add('is-expanded');
+      showBanner();
     }
 
     function saveConsentDecision(analyticsGranted, adsGranted) {
@@ -1065,7 +1093,7 @@ const WHATSAPP_NUMBER = '5562999940769';
       saveAttrib(currentAttrib);
       updateHiddenConsentFields();
 
-      banner.classList.remove('is-visible');
+      hideBanner();
     }
 
     // Se já houver decisão válida (menor que 12 meses), não exibe o banner na visita inicial
@@ -1074,16 +1102,18 @@ const WHATSAPP_NUMBER = '5562999940769';
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed.ts === 'number' && (Date.now() - parsed.ts < CONSENT_EXPIRATION_MS)) {
-          banner.classList.remove('is-visible');
+          hideBanner();
         } else {
-          banner.classList.add('is-visible');
+          showBanner();
         }
       } else {
-        banner.classList.add('is-visible');
+        showBanner();
       }
     } catch (e) {
-      banner.classList.add('is-visible');
+      showBanner();
     }
+
+    window.addEventListener('resize', syncBannerBodySpace, { passive: true });
 
     if (btnAcceptAll) {
       btnAcceptAll.addEventListener('click', function () {
@@ -1105,6 +1135,8 @@ const WHATSAPP_NUMBER = '5562999940769';
         } else if (panel) {
           panel.setAttribute('hidden', '');
           btnCustomize.setAttribute('aria-expanded', 'false');
+          banner.classList.remove('is-expanded');
+          syncBannerBodySpace();
         }
       });
     }

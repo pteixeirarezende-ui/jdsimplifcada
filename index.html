@@ -103,6 +103,45 @@
           <p class="jd-hero-a__subtitle" id="hero-subtitle" style="font-size:clamp(14px, 1.8vw, 17px);max-width:720px;margin:0 auto;color:var(--jd-cinza-aco);">
             Informe o que vai armazenar e as medidas do espaço. A JD monta o orçamento e envia pelo WhatsApp.
           </p>
+          <script>
+            (function () {
+              var V = window.JD_VARIANTS = {
+                preco: {
+                  h1: 'Quanto custa a sua câmara fria? Informe as medidas e receba o orçamento da JD',
+                  sub: 'Cada câmara é projetada sob medida, então o valor depende do tamanho, da temperatura e do uso. Conte o que você precisa e a JD envia o orçamento.'
+                },
+                mini: {
+                  h1: 'Mini câmara fria sob medida para o seu espaço',
+                  sub: 'Para quem tem pouco espaço e precisa de frio. Informe o que vai armazenar e as medidas e receba o orçamento da JD.'
+                },
+                walkin: {
+                  h1: 'Câmara fria para bebidas: walk-in cooler sob medida, entregue e instalada',
+                  sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
+                },
+                congelados: {
+                  h1: 'Câmara de congelados (-18 °C) sob medida, com instalação pela JD',
+                  sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
+                },
+                resfriados: {
+                  h1: 'Câmara de resfriados (0 a +15 °C) sob medida, com instalação pela JD',
+                  sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
+                }
+              };
+              var key = 'padrao';
+              try {
+                var p = new URLSearchParams(window.location.search).get('h');
+                var k = p ? p.toLowerCase().trim() : '';
+                if (k && Object.prototype.hasOwnProperty.call(V, k)) {
+                  key = k;
+                  var h1 = document.getElementById('hero-title');
+                  var sub = document.getElementById('hero-subtitle');
+                  if (h1) h1.textContent = V[k].h1;
+                  if (sub) sub.textContent = V[k].sub;
+                }
+              } catch (e) {}
+              window.JD_ACTIVE_VARIANT = key;
+            })();
+          </script>
         </div>
 
         <!-- ====================================================================
@@ -373,7 +412,7 @@
 
         <div class="jd-footer__links">
           <a href="#simulador-form-card" data-cta-simular>Pedir Orçamento</a>
-          <a href="https://www.facebook.com/privacy/policy/?locale=pt_BR" target="_blank" rel="noopener noreferrer" data-privacy-link>Política de Privacidade</a>
+          <a href="/privacidade/" target="_blank" rel="noopener" data-privacy-link>Política de Privacidade</a>
           <button type="button" class="lp-footer-pref-btn" id="lp-cookie-pref-btn">Preferências de cookies</button>
         </div>
       </div>
@@ -403,10 +442,9 @@
   <section class="lp-cookie-banner" id="lp-cookie-banner" role="region" aria-label="Aviso de cookies" aria-live="polite">
     <div class="lp-cookie-banner__inner">
       <div class="lp-cookie-banner__main">
-        <h2 class="lp-cookie-banner__title">Sua privacidade</h2>
         <p class="lp-cookie-banner__text">
-          Usamos cookies para fazer o site funcionar, entender o uso da página e medir nossos anúncios. Você escolhe o que permitir.
-          <a href="https://www.facebook.com/privacy/policy/?locale=pt_BR" target="_blank" rel="noopener noreferrer" class="lp-cookie-banner__link" data-privacy-link>Política de privacidade</a>.
+          Usamos cookies para melhorar sua experiência e medir anúncios.
+          <a href="/privacidade/" target="_blank" rel="noopener" class="lp-cookie-banner__link" data-privacy-link>Política de privacidade</a>.
         </p>
         <div class="lp-cookie-banner__actions">
           <button type="button" class="lp-cookie-btn" id="lp-cookie-accept-all">Aceitar todos</button>
@@ -416,6 +454,7 @@
       </div>
 
       <div class="lp-cookie-panel" id="lp-cookie-panel" hidden>
+        <h2 class="lp-cookie-banner__title">Sua privacidade</h2>
         <div class="lp-cookie-panel__row">
           <div class="lp-cookie-panel__info">
             <span class="lp-cookie-panel__label">Necessários (sempre ativos)</span>

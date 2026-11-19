@@ -828,6 +828,11 @@
   color: var(--jd-branco);
 }
 
+/* Espaço reservado no body enquanto o banner de cookies estiver visível */
+body.has-cookie-banner {
+  padding-bottom: var(--lp-cookie-banner-height, 96px);
+}
+
 .lp-cookie-banner {
   position: fixed;
   bottom: 0;
@@ -837,10 +842,10 @@
   background: var(--jd-grafite);
   color: var(--jd-branco);
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.45);
   display: none;
-  max-height: 40vh;
-  overflow-y: auto;
+  max-height: 96px;
+  overflow: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -848,24 +853,30 @@
   display: block;
 }
 
+.lp-cookie-banner.is-expanded,
+.lp-cookie-banner:has(.lp-cookie-panel:not([hidden])) {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
 .lp-cookie-banner__inner {
   max-width: var(--jd-container-max);
   margin: 0 auto;
-  padding: var(--jd-space-3) var(--jd-section-px);
+  padding: 8px 16px;
   display: flex;
   flex-direction: column;
-  gap: var(--jd-space-3);
+  gap: 8px;
 }
 
 .lp-cookie-banner__main {
   display: flex;
   flex-direction: column;
-  gap: var(--jd-space-2);
+  gap: 6px;
 }
 
 .lp-cookie-banner__title {
   font-family: var(--jd-font-display);
-  font-size: var(--jd-text-base);
+  font-size: var(--jd-text-sm);
   font-weight: var(--jd-fw-semibold);
   color: var(--jd-branco);
   margin: 0;
@@ -873,18 +884,18 @@
 }
 
 .lp-cookie-banner__text {
-  font-size: var(--jd-text-sm);
+  font-size: 13px;
   color: var(--jd-cinza-aco);
   margin: 0;
-  line-height: var(--jd-lh-normal);
+  line-height: 1.3;
 }
 
 .lp-cookie-banner__link {
   color: var(--jd-ciano);
   text-decoration: underline;
-  text-underline-offset: 3px;
-  display: inline-block;
-  padding: var(--jd-space-1) 0;
+  text-underline-offset: 2px;
+  display: inline;
+  padding: 0;
 }
 
 .lp-cookie-banner__link:hover {
@@ -893,9 +904,9 @@
 
 .lp-cookie-banner__actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--jd-space-2);
-  margin-top: var(--jd-space-1);
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-top: 0;
 }
 
 /* 3 botões com o mesmo peso visual (neutros/iguais) */
@@ -903,19 +914,20 @@
   appearance: none;
   background: transparent;
   color: var(--jd-branco);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: var(--jd-radius);
-  padding: var(--jd-space-2) var(--jd-space-4);
+  padding: 6px 12px;
   font-family: var(--jd-font-body);
-  font-size: var(--jd-text-sm);
+  font-size: 13px;
   font-weight: var(--jd-fw-semibold);
   letter-spacing: var(--jd-ls-normal);
   cursor: pointer;
-  min-height: 44px;
+  min-height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  white-space: nowrap;
   touch-action: manipulation;
   transition: all var(--jd-duration-fast);
 }
@@ -1026,9 +1038,145 @@
   margin-top: var(--jd-space-1);
 }
 
+@media (max-width: 640px) {
+  /* Primeira dobra mobile compacta para garantir visibilidade completa sem cobertura do banner */
+  #lp-header.lp-header {
+    height: 50px;
+  }
+
+  #hero.jd-hero-a {
+    padding-top: 8px !important;
+  }
+
+  #hero .jd-container > div:first-child {
+    margin-bottom: 8px !important;
+  }
+
+  #hero-title.jd-hero-a__title {
+    font-size: 19px !important;
+    line-height: 1.15 !important;
+    margin-bottom: 4px !important;
+    min-height: 66px;
+  }
+
+  #hero-subtitle.jd-hero-a__subtitle {
+    font-size: 12.5px !important;
+    line-height: 1.25 !important;
+    min-height: 47px;
+  }
+
+  #simulador-form-card.jd-sim-direto-card {
+    padding: 10px 12px;
+  }
+
+  #simulador-form-card .jd-sim-direto-header {
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+
+  #simulador-form-card .jd-sim-direto-title {
+    font-size: 15px;
+    line-height: 1.15;
+  }
+
+  #simulador-form-card .jd-sim-direto-sub {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  #simulador-form-card .jd-sim-section {
+    margin-bottom: 8px;
+  }
+
+  #simulador-form-card .jd-sim-section-label {
+    font-size: 12px;
+    margin-bottom: 5px;
+  }
+
+  #simulador-form-card .jd-sim-tipo-grid {
+    gap: 6px;
+  }
+
+  #simulador-form-card .jd-sim-tipo-btn {
+    min-height: 40px;
+    padding: 5px 8px;
+    gap: 6px;
+  }
+
+  #simulador-form-card .jd-sim-tipo-btn__icon {
+    font-size: 16px;
+  }
+
+  #simulador-form-card .jd-sim-tipo-btn__name {
+    font-size: 12px;
+    line-height: 1.15;
+  }
+
+  #simulador-form-card .jd-sim-field-sublabel {
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+
+  #simulador-form-card .jd-sim-contato-grid {
+    gap: 6px;
+  }
+
+  #simulador-form-card .jd-sim-input,
+  #simulador-form-card .jd-sim-select {
+    height: 42px;
+  }
+
+  /* Banner de cookies compacto no mobile */
+  .lp-cookie-banner {
+    max-height: 96px;
+  }
+
+  .lp-cookie-banner.is-expanded,
+  .lp-cookie-banner:has(.lp-cookie-panel:not([hidden])) {
+    max-height: 75vh;
+    overflow-y: auto;
+  }
+
+  .lp-cookie-banner__inner {
+    padding: 6px 12px;
+    gap: 6px;
+  }
+
+  .lp-cookie-banner__main {
+    gap: 5px;
+  }
+
+  .lp-cookie-banner__text {
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .lp-cookie-banner__actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .lp-cookie-btn {
+    min-height: 40px;
+    padding: 6px 4px;
+    font-size: 12px;
+    width: 100%;
+  }
+
+  .lp-cookie-panel {
+    padding-top: 10px;
+    gap: 10px;
+  }
+
+  .lp-cookie-panel__actions .lp-cookie-btn--save {
+    width: 100%;
+  }
+}
+
 @media (min-width: 768px) {
   .lp-cookie-banner__inner {
-    padding: var(--jd-space-4) var(--jd-section-px);
+    padding: 10px var(--jd-section-px);
   }
 
   .lp-cookie-banner__main {
@@ -1038,10 +1186,13 @@
     gap: var(--jd-space-4);
   }
 
-  .lp-cookie-banner__main>div:first-child,
-  .lp-cookie-banner__main>p,
-  .lp-cookie-banner__main>h2 {
+  .lp-cookie-banner__text {
     flex: 1;
+    font-size: 13px;
+  }
+
+  .lp-cookie-banner__actions {
+    flex-shrink: 0;
   }
 }
 
