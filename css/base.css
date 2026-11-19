@@ -4,15 +4,32 @@
    ============================================================================ */
 
 /* ====================================================================
-   FONTS — Google Fonts com font-display: swap
-   Archivo 800 (display), Inter 400/600 (corpo)
+   FONTS — Self-hosted woff2 locais com font-display: swap
+   Pesos efetivamente usados: Archivo 800/900 (display), Inter 400/600/700 (corpo)
    ==================================================================== */
 @font-face {
   font-family: 'Archivo';
   font-style: normal;
   font-weight: 800;
   font-display: swap;
-  src: url('https://fonts.gstatic.com/s/archivo/v19/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTBj1p.woff2') format('woff2');
+  src: url('../assets/fonts/archivo-800.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('../assets/fonts/archivo-900.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Archivo Fallback';
+  src: local('Arial Black'), local('Arial');
+  ascent-override: 93%;
+  descent-override: 23%;
+  line-gap-override: 0%;
+  size-adjust: 100%;
 }
 
 @font-face {
@@ -20,7 +37,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiA.woff2') format('woff2');
+  src: url('../assets/fonts/inter-400.woff2') format('woff2');
 }
 
 @font-face {
@@ -28,7 +45,24 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fAZ9hiA.woff2') format('woff2');
+  src: url('../assets/fonts/inter-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/inter-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial'), local('Segoe UI');
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+  size-adjust: 107%;
 }
 
 

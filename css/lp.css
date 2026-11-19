@@ -32,6 +32,11 @@
   border-bottom: 1px solid rgba(55, 180, 206, 0.22);
 }
 
+/* Reserva exata de proporção do logo (1024x185) para evitar CLS */
+.lp-brand img {
+  aspect-ratio: 1024 / 185;
+}
+
 .lp-header.is-scrolled {
   background: rgba(18, 17, 31, 0.98);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(55, 180, 206, 0.3);
@@ -56,6 +61,7 @@
 .lp-header-cta {
   position: relative;
   overflow: hidden;
+  contain: layout paint;
 }
 
 .jd-btn--primary::after,
@@ -63,14 +69,15 @@
   content: '';
   position: absolute;
   top: -50%;
-  left: -150%;
+  left: 0;
   width: 60%;
   height: 200%;
   background: linear-gradient(90deg,
       transparent 0%,
       rgba(255, 255, 255, 0.45) 50%,
       transparent 100%);
-  transform: rotate(25deg);
+  transform: translate3d(-250%, 0, 0) rotate(25deg);
+  will-change: transform;
   pointer-events: none;
   animation: jd-laser-sweep 4.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
@@ -79,11 +86,11 @@
 
   0%,
   70% {
-    left: -150%;
+    transform: translate3d(-250%, 0, 0) rotate(25deg);
   }
 
   100% {
-    left: 250%;
+    transform: translate3d(420%, 0, 0) rotate(25deg);
   }
 }
 
@@ -1098,9 +1105,13 @@ body.has-cookie-banner {
   }
 
   #simulador-form-card .jd-sim-tipo-btn {
-    min-height: 40px;
+    min-height: 44px;
     padding: 5px 8px;
     gap: 6px;
+  }
+
+  #simulador-form-card .jd-sim-tipo-btn:not([data-tipo-btn="indefinido"]) {
+    min-height: 54px;
   }
 
   #simulador-form-card .jd-sim-tipo-btn__icon {

@@ -47,6 +47,15 @@
     }).trim();
   }
 
+  let waLinksTimer = null;
+  function scheduleWhatsAppLinksUpdate() {
+    if (waLinksTimer) clearTimeout(waLinksTimer);
+    waLinksTimer = setTimeout(function () {
+      waLinksTimer = null;
+      updateWhatsAppLinks();
+    }, 180);
+  }
+
   // Recalcula volume somente se todas as medidas estiverem preenchidas
   function updateVolume() {
     const c = parseFloat(String(estado.comprimento).replace(',', '.'));
@@ -59,7 +68,7 @@
       estado.volume = '';
     }
 
-    updateWhatsAppLinks();
+    scheduleWhatsAppLinksUpdate();
   }
 
   // Gera texto para o WhatsApp com os dados preenchidos
@@ -116,24 +125,31 @@
     }
   }
 
-  // Máscara brasileira de telefone BR (XX) XXXXX-XXXX ou (XX) XXXX-XXXX
+  // Máscara brasileira de telefone BR (XX) XXXXX-XXXX ou (XX) XXXX-XXXX (otimizada para baixo INP)
   function applyMask(input) {
     if (!input) return;
     input.addEventListener('input', function () {
       let v = this.value.replace(/\D/g, '');
       if (v.length > 11) v = v.slice(0, 11);
 
+      let formatted = '';
       if (v.length > 10) {
-        this.value = '(' + v.slice(0, 2) + ') ' + v.slice(2, 7) + '-' + v.slice(7);
+        formatted = '(' + v.slice(0, 2) + ') ' + v.slice(2, 7) + '-' + v.slice(7);
       } else if (v.length > 6) {
-        this.value = '(' + v.slice(0, 2) + ') ' + v.slice(2, 6) + '-' + v.slice(6);
+        formatted = '(' + v.slice(0, 2) + ') ' + v.slice(2, 6) + '-' + v.slice(6);
       } else if (v.length > 2) {
-        this.value = '(' + v.slice(0, 2) + ') ' + v.slice(2);
+        formatted = '(' + v.slice(0, 2) + ') ' + v.slice(2);
       } else if (v.length > 0) {
-        this.value = '(' + v;
+        formatted = '(' + v;
       }
-      this.classList.remove('is-invalid');
-    });
+
+      if (this.value !== formatted) {
+        this.value = formatted;
+      }
+      if (this.classList.contains('is-invalid')) {
+        this.classList.remove('is-invalid');
+      }
+    }, { passive: true });
   }
 
   function initSimuladorDireto() {
@@ -143,8 +159,12 @@
 
     tipoBtns.forEach(btn => {
       btn.addEventListener('click', function () {
-        tipoBtns.forEach(b => b.classList.remove('is-selected'));
+        tipoBtns.forEach(b => {
+          b.classList.remove('is-selected');
+          b.setAttribute('aria-pressed', 'false');
+        });
         this.classList.add('is-selected');
+        this.setAttribute('aria-pressed', 'true');
 
         const key = this.getAttribute('data-tipo-btn');
         estado.tipo = key;
@@ -177,36 +197,36 @@
       updateVolume();
     }
 
-    if (inpC) { inpC.addEventListener('input', onDimChange); inpC.addEventListener('change', onDimChange); }
-    if (inpL) { inpL.addEventListener('input', onDimChange); inpL.addEventListener('change', onDimChange); }
-    if (inpA) { inpA.addEventListener('input', onDimChange); inpA.addEventListener('change', onDimChange); }
+    if (inpC) { inpC.addEventListener('input', onDimChange, { passive: true }); inpC.addEventListener('change', onDimChange, { passive: true }); }
+    if (inpL) { inpL.addEventListener('input', onDimChange, { passive: true }); inpL.addEventListener('change', onDimChange, { passive: true }); }
+    if (inpA) { inpA.addEventListener('input', onDimChange, { passive: true }); inpA.addEventListener('change', onDimChange, { passive: true }); }
 
     // 3. Armazenar, Cidade e UF
     const selArm = document.getElementById('sim-field-armazenar');
     if (selArm) {
       selArm.addEventListener('change', e => {
-        selArm.classList.remove('is-invalid');
+        if (selArm.classList.contains('is-invalid')) selArm.classList.remove('is-invalid');
         estado.armazenar = sanitize(e.target.value);
-        updateVolume();
-      });
+        scheduleWhatsAppLinksUpdate();
+      }, { passive: true });
     }
 
     const inpCidade = document.getElementById('sim-field-cidade');
     if (inpCidade) {
       inpCidade.addEventListener('input', e => {
-        inpCidade.classList.remove('is-invalid');
+        if (inpCidade.classList.contains('is-invalid')) inpCidade.classList.remove('is-invalid');
         estado.cidade = sanitize(e.target.value);
-        updateVolume();
-      });
+        scheduleWhatsAppLinksUpdate();
+      }, { passive: true });
     }
 
     const selUf = document.getElementById('sim-field-uf');
     if (selUf) {
       selUf.addEventListener('change', e => {
-        selUf.classList.remove('is-invalid');
+        if (selUf.classList.contains('is-invalid')) selUf.classList.remove('is-invalid');
         estado.uf = sanitize(e.target.value);
-        updateVolume();
-      });
+        scheduleWhatsAppLinksUpdate();
+      }, { passive: true });
     }
 
     // 4. Máscara de Telefone e Validação
@@ -216,8 +236,8 @@
     if (waInp) applyMask(waInp);
     if (nomeInp) {
       nomeInp.addEventListener('input', function () {
-        this.classList.remove('is-invalid');
-      });
+        if (this.classList.contains('is-invalid')) this.classList.remove('is-invalid');
+      }, { passive: true });
     }
 
     // Exporta estado e helpers para o motor unificado em lp.js

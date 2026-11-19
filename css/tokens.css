@@ -115,8 +115,8 @@
      2 famílias, 3 pesos: Archivo 800, Inter 400 e 600
      ==================================================================== */
 
-  --jd-font-display:   'Archivo', 'Arial Black', sans-serif;
-  --jd-font-body:      'Inter', 'Segoe UI', system-ui, sans-serif;
+  --jd-font-display:   'Archivo', 'Archivo Fallback', 'Arial Black', sans-serif;
+  --jd-font-body:      'Inter', 'Inter Fallback', 'Segoe UI', system-ui, sans-serif;
 
   /* Pesos */
   --jd-fw-regular:     400;

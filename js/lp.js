@@ -603,16 +603,19 @@ const WHATSAPP_NUMBER = '5562999940769';
     const honeypot = document.getElementById('sim-honeypot-field');
     let isSubmitting = false;
 
-    // Primeira interação com o formulário -> gera lead_id e dispara lead_form_start
-    form.addEventListener('focusin', handleFirstInteraction);
-    form.addEventListener('input', handleFirstInteraction);
+    // Primeira interação com o formulário -> gera lead_id e dispara lead_form_start (sem bloquear o frame)
+    form.addEventListener('focusin', handleFirstInteraction, { passive: true });
+    form.addEventListener('input', handleFirstInteraction, { passive: true });
 
     function handleFirstInteraction() {
-      if (!formStartedTracked) {
-        formStartedTracked = true;
-        const id = getOrCreateLeadId();
+      if (formStartedTracked) return;
+      formStartedTracked = true;
+      form.removeEventListener('focusin', handleFirstInteraction);
+      form.removeEventListener('input', handleFirstInteraction);
+      const id = getOrCreateLeadId();
+      setTimeout(function () {
         pushTrackingEvent('lead_form_start', { lead_id: id });
-      }
+      }, 0);
     }
 
     // Tentar de novo após erro de envio: reenvia com o MESMO lead_id
@@ -638,16 +641,20 @@ const WHATSAPP_NUMBER = '5562999940769';
     [nomeInp, waInp, cidInp, inpC, inpL, inpA].forEach(function (inp) {
       if (inp) {
         inp.addEventListener('input', function () {
-          inp.classList.remove('is-invalid');
-        });
+          if (inp.classList.contains('is-invalid')) {
+            inp.classList.remove('is-invalid');
+          }
+        }, { passive: true });
       }
     });
 
     [armInp, ufInp].forEach(function (sel) {
       if (sel) {
         sel.addEventListener('change', function () {
-          sel.classList.remove('is-invalid');
-        });
+          if (sel.classList.contains('is-invalid')) {
+            sel.classList.remove('is-invalid');
+          }
+        }, { passive: true });
       }
     });
 
@@ -1071,29 +1078,30 @@ const WHATSAPP_NUMBER = '5562999940769';
         /* noop: fallback gracioso para modo privado */
       }
 
-      if (typeof window.gtag === 'function') {
-        window.gtag('consent', 'update', {
-          'ad_storage': data.ads ? 'granted' : 'denied',
-          'ad_user_data': data.ads ? 'granted' : 'denied',
-          'ad_personalization': data.ads ? 'granted' : 'denied',
-          'analytics_storage': data.analytics ? 'granted' : 'denied'
-        });
-      }
-
-      if (window.dataLayer) {
-        window.dataLayer.push({
-          event: 'consent_update',
-          consent_analytics: data.analytics,
-          consent_ads: data.ads,
-          lp_version: 'B'
-        });
-      }
-
-      // Reavalia persistência da atribuição com base no novo consentimento de ads
+      // Atualiza a UI imediatamente para manter o INP baixo antes do trabalho síncrono do GTM
+      hideBanner();
       saveAttrib(currentAttrib);
       updateHiddenConsentFields();
 
-      hideBanner();
+      setTimeout(function () {
+        if (typeof window.gtag === 'function') {
+          window.gtag('consent', 'update', {
+            'ad_storage': data.ads ? 'granted' : 'denied',
+            'ad_user_data': data.ads ? 'granted' : 'denied',
+            'ad_personalization': data.ads ? 'granted' : 'denied',
+            'analytics_storage': data.analytics ? 'granted' : 'denied'
+          });
+        }
+
+        if (window.dataLayer) {
+          window.dataLayer.push({
+            event: 'consent_update',
+            consent_analytics: data.analytics,
+            consent_ads: data.ads,
+            lp_version: 'B'
+          });
+        }
+      }, 0);
     }
 
     // Se já houver decisão válida (menor que 12 meses), não exibe o banner na visita inicial

@@ -11,10 +11,10 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/logo-jd.png">
 
-  <!-- Google Fonts: Archivo (display) + Inter (corpo) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Preload das fontes críticas self-hosted (sem dependência externa) -->
+  <link rel="preload" href="assets/fonts/archivo-900.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/inter-600.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- Estilos Oficiais do Design System -->
   <link rel="stylesheet" href="css/tokens.css">
@@ -75,7 +75,7 @@
   <header class="lp-header" id="lp-header">
     <div class="lp-header-inner">
       <a href="#" class="lp-brand" aria-label="JD Câmaras Frias — Página Inicial">
-        <img src="assets/logo-jd-branco.png" alt="JD Câmaras Frias" width="168" height="38" onerror="this.outerHTML='<div class=\'lp-brand-fallback\'><span class=\'fallback-jd\'>JD</span> <span class=\'fallback-sub\'>CÂMARAS FRIAS</span></div>'">
+        <img src="assets/logo-jd-branco.png" alt="JD Câmaras Frias" width="210" height="38" onerror="this.outerHTML='<div class=\'lp-brand-fallback\'><span class=\'fallback-jd\'>JD</span> <span class=\'fallback-sub\'>CÂMARAS FRIAS</span></div>'">
       </a>
 
       <div style="display:flex;align-items:center;gap:12px;">
@@ -193,27 +193,27 @@
                 <div class="jd-sim-section">
                   <label class="jd-sim-section-label jd-sim-section-label--required">1. Qual tipo de câmara você procura?</label>
                   <div class="jd-sim-tipo-grid">
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="mini" role="button" tabindex="0">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="mini" role="button" tabindex="0" aria-pressed="false">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">🧊</span>
                       <span class="jd-sim-tipo-btn__name">Mini câmara</span>
                     </div>
 
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="expositora" role="button" tabindex="0">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="expositora" role="button" tabindex="0" aria-pressed="false">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">🏪</span>
                       <span class="jd-sim-tipo-btn__name">Câmara expositora (walk-in cooler)</span>
                     </div>
 
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="resfriados" role="button" tabindex="0">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="resfriados" role="button" tabindex="0" aria-pressed="false">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">🌡</span>
                       <span class="jd-sim-tipo-btn__name">Câmara de resfriados (0 a +15 °C)</span>
                     </div>
 
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="congelados" role="button" tabindex="0">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="congelados" role="button" tabindex="0" aria-pressed="false">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">❄</span>
                       <span class="jd-sim-tipo-btn__name">Câmara de congelados (-18 °C)</span>
                     </div>
 
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="indefinido" role="button" tabindex="0">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="indefinido" role="button" tabindex="0" aria-pressed="false">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">❓</span>
                       <span class="jd-sim-tipo-btn__name">Ainda não sei</span>
                     </div>
@@ -308,35 +308,35 @@
                   <div class="jd-sim-medidas-grid">
                     <!-- Comprimento -->
                     <div class="jd-sim-medida-box">
-                      <div class="jd-sim-medida-lbl">
+                      <label for="sim-field-c" class="jd-sim-medida-lbl">
                         <span>Comprimento</span>
-                      </div>
-                      <div class="jd-sim-medida-input-wrap">
-                        <input type="number" id="sim-field-c" class="jd-sim-medida-input" placeholder="ex.: 3,0" step="any">
-                        <span class="jd-sim-medida-unit">m</span>
-                      </div>
+                      </label>
+                      <label for="sim-field-c" class="jd-sim-medida-input-wrap">
+                        <input type="number" id="sim-field-c" class="jd-sim-medida-input" placeholder="ex.: 3,0" step="any" aria-label="Comprimento em metros">
+                        <span class="jd-sim-medida-unit" aria-hidden="true">m</span>
+                      </label>
                     </div>
 
                     <!-- Largura -->
                     <div class="jd-sim-medida-box">
-                      <div class="jd-sim-medida-lbl">
+                      <label for="sim-field-l" class="jd-sim-medida-lbl">
                         <span>Largura</span>
-                      </div>
-                      <div class="jd-sim-medida-input-wrap">
-                        <input type="number" id="sim-field-l" class="jd-sim-medida-input" placeholder="ex.: 2,5" step="any">
-                        <span class="jd-sim-medida-unit">m</span>
-                      </div>
+                      </label>
+                      <label for="sim-field-l" class="jd-sim-medida-input-wrap">
+                        <input type="number" id="sim-field-l" class="jd-sim-medida-input" placeholder="ex.: 2,5" step="any" aria-label="Largura em metros">
+                        <span class="jd-sim-medida-unit" aria-hidden="true">m</span>
+                      </label>
                     </div>
 
                     <!-- Altura -->
                     <div class="jd-sim-medida-box">
-                      <div class="jd-sim-medida-lbl">
+                      <label for="sim-field-a" class="jd-sim-medida-lbl">
                         <span>Altura</span>
-                      </div>
-                      <div class="jd-sim-medida-input-wrap">
-                        <input type="number" id="sim-field-a" class="jd-sim-medida-input" placeholder="ex.: 2,8" step="any">
-                        <span class="jd-sim-medida-unit">m</span>
-                      </div>
+                      </label>
+                      <label for="sim-field-a" class="jd-sim-medida-input-wrap">
+                        <input type="number" id="sim-field-a" class="jd-sim-medida-input" placeholder="ex.: 2,8" step="any" aria-label="Altura em metros">
+                        <span class="jd-sim-medida-unit" aria-hidden="true">m</span>
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -398,7 +398,7 @@
         <div class="jd-footer__info">
           <div class="jd-footer__logo">
             <a href="#" class="lp-brand" aria-label="JD Câmaras Frias">
-              <img src="assets/logo-jd-branco.png" alt="JD Câmaras Frias" width="168" height="38" loading="lazy" onerror="this.outerHTML='<div class=\'lp-brand-fallback\'><span class=\'fallback-jd\'>JD</span> <span class=\'fallback-sub\'>CÂMARAS FRIAS</span></div>'">
+              <img src="assets/logo-jd-branco.png" alt="JD Câmaras Frias" width="210" height="38" loading="lazy" onerror="this.outerHTML='<div class=\'lp-brand-fallback\'><span class=\'fallback-jd\'>JD</span> <span class=\'fallback-sub\'>CÂMARAS FRIAS</span></div>'">
             </a>
           </div>
           <p class="lp-footer__empresa"><strong>J.D. Câmaras Frias &bull; Engenharia do Frio</strong></p>
