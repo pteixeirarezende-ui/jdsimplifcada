@@ -308,15 +308,318 @@ const WHATSAPP_NUMBER = '5562999940769';
     return ref;
   }
 
+  // 8B. FILA PERSISTENTE DE LEADS COM TIMEOUT (12s), BACKOFF E DEDUPLICAÇÃO DE CONVERSÃO
+  const LEAD_QUEUE_STORAGE_KEY = 'jd_lead_queue_v1';
+  const LEAD_CONVERTED_STORAGE_KEY = 'jd_lead_converted_v1';
+  const LEAD_FETCH_TIMEOUT_MS = 12000;
+  const LEAD_MAX_ATTEMPTS = 5;
+  const LEAD_BACKOFF_MS = [5000, 30000, 120000, 300000];
+  const LEAD_QUEUE_TTL_MS = 24 * 60 * 60 * 1000;
+
+  const LeadQueue = (function () {
+    let memoryQueue = [];
+    let memoryConverted = {};
+    let inFlightIds = {};
+    let inFlightPromises = {};
+    let retryTimer = null;
+    let onSuccessCallback = null;
+
+    function loadConvertedMap() {
+      const map = Object.assign({}, memoryConverted);
+      try {
+        const raw = localStorage.getItem(LEAD_CONVERTED_STORAGE_KEY);
+        if (raw) {
+          const arr = JSON.parse(raw);
+          if (Array.isArray(arr)) {
+            arr.forEach(function (id) {
+              if (typeof id === 'string' && id) map[id] = true;
+            });
+          }
+        }
+      } catch (e) { /* noop */ }
+      return map;
+    }
+
+    function hasFiredConversion(leadId) {
+      if (!leadId) return false;
+      return Boolean(loadConvertedMap()[leadId]);
+    }
+
+    function markConversionFired(leadId) {
+      if (!leadId) return;
+      memoryConverted[leadId] = true;
+      try {
+        const map = loadConvertedMap();
+        map[leadId] = true;
+        const keys = Object.keys(map).slice(-50);
+        localStorage.setItem(LEAD_CONVERTED_STORAGE_KEY, JSON.stringify(keys));
+      } catch (e) { /* noop */ }
+    }
+
+    function pushLeadConversionOnce(payload) {
+      if (!payload || !payload.lead_id) return false;
+      if (hasFiredConversion(payload.lead_id)) return false;
+      markConversionFired(payload.lead_id);
+
+      const normalizedPhone = normalizePhoneE164(payload.whatsapp || '');
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'lead_form_submit',
+        lead_id: payload.lead_id,
+        event_id: payload.lead_id,
+        tipo_camara: payload.tipo_camara || '',
+        armazenar: payload.armazenar || '',
+        uf: payload.uf || '',
+        lp_version: payload.lp_version || 'B',
+        titulo_variante: payload.titulo_variante || activeVariantKey,
+        user_data: {
+          phone_number: normalizedPhone
+        }
+      });
+      return true;
+    }
+
+    function readQueue() {
+      try {
+        const raw = localStorage.getItem(LEAD_QUEUE_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            memoryQueue = parsed;
+            return parsed;
+          }
+        } else {
+          memoryQueue = [];
+          return [];
+        }
+      } catch (e) { /* fallback memória */ }
+      return memoryQueue.slice();
+    }
+
+    function writeQueue(list) {
+      memoryQueue = list.slice();
+      try {
+        if (list.length === 0) {
+          localStorage.removeItem(LEAD_QUEUE_STORAGE_KEY);
+        } else {
+          localStorage.setItem(LEAD_QUEUE_STORAGE_KEY, JSON.stringify(list));
+        }
+      } catch (e) { /* noop */ }
+    }
+
+    function enqueue(payload) {
+      if (!payload || !payload.lead_id) return null;
+      const list = readQueue();
+      const now = Date.now();
+      let existing = null;
+
+      for (let i = 0; i < list.length; i++) {
+        if (list[i] && list[i].lead_id === payload.lead_id) {
+          existing = list[i];
+          existing.payload = payload;
+          existing.nextAttemptAt = now;
+          break;
+        }
+      }
+
+      if (!existing) {
+        existing = {
+          lead_id: payload.lead_id,
+          payload: payload,
+          attempts: 0,
+          nextAttemptAt: now,
+          createdAt: now
+        };
+        list.push(existing);
+      }
+
+      writeQueue(list);
+      return existing;
+    }
+
+    function removeFromQueue(leadId) {
+      const list = readQueue().filter(function (item) {
+        return item && item.lead_id !== leadId;
+      });
+      writeQueue(list);
+    }
+
+    function postWithTimeout(payload, retryNumber) {
+      let url = LEAD_ENDPOINT;
+      if (retryNumber > 0) {
+        url += (url.indexOf('?') === -1 ? '?' : '&') + 'retry=' + retryNumber;
+      }
+
+      const controller = typeof AbortController === 'function' ? new AbortController() : null;
+      const timer = setTimeout(function () {
+        if (controller) controller.abort();
+      }, LEAD_FETCH_TIMEOUT_MS);
+
+      const opts = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      };
+      if (controller) {
+        opts.signal = controller.signal;
+      }
+
+      return fetch(url, opts)
+        .then(function (res) {
+          clearTimeout(timer);
+          if (!res.ok || res.status < 200 || res.status >= 300) {
+            throw new Error('HTTP ' + res.status);
+          }
+          return res.json().catch(function () { return {}; });
+        })
+        .catch(function (err) {
+          clearTimeout(timer);
+          throw err;
+        });
+    }
+
+    function scheduleNextRetry() {
+      if (retryTimer) {
+        clearTimeout(retryTimer);
+        retryTimer = null;
+      }
+
+      const list = readQueue();
+      let earliest = null;
+      const now = Date.now();
+
+      for (let i = 0; i < list.length; i++) {
+        const item = list[i];
+        if (!item || !item.lead_id) continue;
+        if (item.attempts >= LEAD_MAX_ATTEMPTS) continue;
+        if (inFlightIds[item.lead_id]) continue;
+        const targetTime = typeof item.nextAttemptAt === 'number' ? item.nextAttemptAt : now;
+        if (earliest === null || targetTime < earliest) {
+          earliest = targetTime;
+        }
+      }
+
+      if (earliest !== null) {
+        const waitMs = Math.max(250, earliest - now);
+        retryTimer = setTimeout(function () {
+          retryTimer = null;
+          flush(false);
+        }, waitMs);
+      }
+    }
+
+    function sendItem(leadId, isManual) {
+      if (!leadId) {
+        return Promise.resolve({ skipped: true });
+      }
+      if (inFlightIds[leadId]) {
+        return isManual && inFlightPromises[leadId] ? inFlightPromises[leadId] : Promise.resolve({ skipped: true });
+      }
+
+      const list = readQueue();
+      let entry = null;
+      for (let i = 0; i < list.length; i++) {
+        if (list[i] && list[i].lead_id === leadId) {
+          entry = list[i];
+          break;
+        }
+      }
+      if (!entry) {
+        return Promise.resolve({ skipped: true });
+      }
+      if (!isManual && entry.attempts >= LEAD_MAX_ATTEMPTS) {
+        return Promise.resolve({ skipped: true });
+      }
+
+      const retryNumber = entry.attempts;
+      inFlightIds[leadId] = true;
+
+      const reqPromise = postWithTimeout(entry.payload, retryNumber)
+        .then(function () {
+          delete inFlightIds[leadId];
+          delete inFlightPromises[leadId];
+          removeFromQueue(leadId);
+          pushLeadConversionOnce(entry.payload);
+          if (typeof onSuccessCallback === 'function') {
+            onSuccessCallback(entry.payload);
+          }
+          scheduleNextRetry();
+          return { ok: true, lead_id: leadId };
+        })
+        .catch(function (err) {
+          delete inFlightIds[leadId];
+          delete inFlightPromises[leadId];
+          const updated = readQueue();
+          for (let i = 0; i < updated.length; i++) {
+            if (updated[i] && updated[i].lead_id === leadId) {
+              updated[i].attempts = (updated[i].attempts || 0) + 1;
+              const backoffIdx = Math.min(updated[i].attempts - 1, LEAD_BACKOFF_MS.length - 1);
+              updated[i].nextAttemptAt = Date.now() + LEAD_BACKOFF_MS[backoffIdx];
+              break;
+            }
+          }
+          writeQueue(updated);
+          scheduleNextRetry();
+          throw err;
+        });
+
+      inFlightPromises[leadId] = reqPromise;
+      return reqPromise;
+    }
+
+    function flush(forceImmediate) {
+      const now = Date.now();
+      const rawList = readQueue();
+      const cleaned = rawList.filter(function (item) {
+        if (!item || !item.lead_id || !item.payload) return false;
+        const age = now - (item.createdAt || now);
+        if (item.attempts >= LEAD_MAX_ATTEMPTS && age > LEAD_QUEUE_TTL_MS) return false;
+        return true;
+      });
+      if (cleaned.length !== rawList.length) {
+        writeQueue(cleaned);
+      }
+
+      cleaned.forEach(function (item) {
+        if (item.attempts >= LEAD_MAX_ATTEMPTS) return;
+        if (inFlightIds[item.lead_id]) return;
+        if (forceImmediate || !item.nextAttemptAt || item.nextAttemptAt <= now) {
+          sendItem(item.lead_id, false).catch(function (err) {
+            console.warn('[LP LeadQueue] Reenvio adiado para', item.lead_id, err && err.message ? err.message : err);
+          });
+        }
+      });
+
+      scheduleNextRetry();
+    }
+
+    function initQueue() {
+      window.addEventListener('online', function () {
+        flush(true);
+      });
+      flush(true);
+    }
+
+    return {
+      enqueue: enqueue,
+      sendNow: function (leadId) { return sendItem(leadId, true); },
+      flush: flush,
+      init: initQueue,
+      setOnSuccessCallback: function (cb) { onSuccessCallback = cb; }
+    };
+  })();
+
   // 9. MOTOR DO FORMULÁRIO DIRETO (Validação em ordem visual, retry e envio 2xx)
   function initDirectLeadForm() {
     const form = document.getElementById('jd-sim-direto-form');
     if (!form) return;
 
     const btnSubmit = document.getElementById('sim-btn-submit');
+    const originalBtnHtml = btnSubmit ? btnSubmit.innerHTML : '<span>Receber Meu Orçamento</span>';
     const submitErrorWrap = document.getElementById('lp-submit-error');
     const btnRetry = document.getElementById('lp-btn-retry');
     const honeypot = document.getElementById('sim-honeypot-field');
+    let isSubmitting = false;
 
     // Primeira interação com o formulário -> gera lead_id e dispara lead_form_start
     form.addEventListener('focusin', handleFirstInteraction);
@@ -371,7 +674,27 @@ const WHATSAPP_NUMBER = '5562999940769';
       handleFormSubmit();
     });
 
+    // Se um reenvio automático em segundo plano confirmar 2xx para o lead atual, exibe sucesso na hora
+    LeadQueue.setOnSuccessCallback(function (deliveredPayload) {
+      if (deliveredPayload && deliveredPayload.lead_id === currentLeadId) {
+        const alreadyShown = leadSubmittedSuccessfully;
+        isSubmitting = false;
+        leadSubmittedSuccessfully = true;
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.classList.remove('is-loading');
+          btnSubmit.innerHTML = originalBtnHtml;
+        }
+        if (btnRetry) btnRetry.disabled = false;
+        if (!alreadyShown) {
+          showSuccessUI();
+        }
+      }
+    });
+
     function handleFormSubmit() {
+      if (isSubmitting || leadSubmittedSuccessfully) return;
+
       // Honeypot anti-spam (descarte silencioso: interface de sucesso, SEM post e SEM dataLayer)
       if (honeypot && honeypot.value.trim() !== '') {
         showSuccessUI();
@@ -524,40 +847,46 @@ const WHATSAPP_NUMBER = '5562999940769';
       }
 
       // Bloqueio de duplo envio e feedback de carregamento
+      isSubmitting = true;
       if (btnSubmit) {
         btnSubmit.disabled = true;
         btnSubmit.classList.add('is-loading');
         btnSubmit.innerHTML = '<span>Enviando Orçamento...</span>';
       }
+      if (btnRetry) btnRetry.disabled = true;
       if (submitErrorWrap) submitErrorWrap.classList.remove('is-visible');
 
-      // Envia os dados para o Webhook em segundo plano (resiliente e com fallback)
-      try {
-        fetch(LEAD_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          keepalive: true
-        })
-          .then(function (res) {
-            console.log('[LP Webhook Status]', res.status);
-          })
-          .catch(function (err) {
-            console.warn('[LP Webhook Warning]', err);
-            if (navigator.sendBeacon) {
-              try {
-                const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-                navigator.sendBeacon(LEAD_ENDPOINT, blob);
-              } catch (e) { /* fail silently */ }
-            }
-          });
-      } catch (err) {
-        console.warn('[LP Webhook Error]', err);
-      }
+      // Grava na fila persistente ANTES do fetch; só remove após HTTP 2xx
+      LeadQueue.enqueue(payload);
 
-      // Transiciona imediatamente para a visualização de sucesso e libera o WhatsApp do lead
-      leadSubmittedSuccessfully = true;
-      showSuccessView(tipoNome, armazenarVal, ufVal, whatsappVal);
+      LeadQueue.sendNow(leadId)
+        .then(function (result) {
+          isSubmitting = false;
+          if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.classList.remove('is-loading');
+            btnSubmit.innerHTML = originalBtnHtml;
+          }
+          if (btnRetry) btnRetry.disabled = false;
+          if (result && result.ok && !leadSubmittedSuccessfully) {
+            leadSubmittedSuccessfully = true;
+            showSuccessUI();
+          }
+        })
+        .catch(function (err) {
+          console.error('[LP Webhook Error]', err);
+          isSubmitting = false;
+          if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.classList.remove('is-loading');
+            btnSubmit.innerHTML = originalBtnHtml;
+          }
+          if (btnRetry) btnRetry.disabled = false;
+          if (submitErrorWrap) {
+            submitErrorWrap.classList.add('is-visible');
+            submitErrorWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        });
     }
 
     function showSuccessUI() {
@@ -574,26 +903,6 @@ const WHATSAPP_NUMBER = '5562999940769';
         if (floatWa) floatWa.style.display = 'inline-flex';
         if (succBox) succBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-    }
-
-    function showSuccessView(tipoCamara, armazenar, uf, rawPhone) {
-      showSuccessUI();
-
-      // Dispara lead_form_submit SOMENTE após resposta 2xx confirmada
-      const normalizedPhone = normalizePhoneE164(rawPhone);
-      window.dataLayer.push({
-        event: 'lead_form_submit',
-        lead_id: currentLeadId,
-        event_id: currentLeadId,
-        tipo_camara: tipoCamara,
-        armazenar: armazenar,
-        uf: uf,
-        lp_version: 'B',
-        titulo_variante: activeVariantKey,
-        user_data: {
-          phone_number: normalizedPhone
-        }
-      });
     }
   }
 
@@ -863,6 +1172,7 @@ const WHATSAPP_NUMBER = '5562999940769';
     initHeaderAndNavCtas();
     initSpotlight();
     initCookieBanner();
+    LeadQueue.init();
   }
 
   if (document.readyState === 'loading') {
