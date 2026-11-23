@@ -42,6 +42,13 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(55, 180, 206, 0.3);
 }
 
+.lp-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--jd-space-2);
+  flex-shrink: 0;
+}
+
 .lp-header-cta {
   box-shadow: 0 2px 10px rgba(241, 189, 67, 0.3);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
@@ -50,6 +57,85 @@
 .lp-header-cta:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 16px rgba(241, 189, 67, 0.5);
+}
+
+.lp-header-wa {
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 42px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 800;
+  background: var(--jd-verde);
+  color: var(--jd-branco);
+  border: none;
+  border-radius: var(--jd-radius);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 2px 10px rgba(0, 135, 73, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.lp-header-wa:hover {
+  background: var(--jd-verde-hover);
+  color: var(--jd-branco);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 135, 73, 0.5);
+}
+
+.lp-header-wa__label-short {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .lp-header-wa {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-height: 38px;
+  }
+}
+
+@media (max-width: 640px) {
+  #lp-header .lp-header-inner {
+    padding: 0 10px;
+    gap: 6px;
+  }
+
+  #lp-header .lp-brand img {
+    height: 22px;
+  }
+
+  .lp-header-actions {
+    gap: 6px;
+  }
+
+  #lp-header .lp-header-cta {
+    padding: 6px 8px;
+    font-size: 12px;
+    min-height: 36px;
+  }
+
+  .lp-header-cta__arrow {
+    display: none;
+  }
+
+  .lp-header-wa {
+    padding: 6px 8px;
+    font-size: 12px;
+    min-height: 36px;
+    gap: 4px;
+  }
+
+  .lp-header-wa__label-full {
+    display: none;
+  }
+
+  .lp-header-wa__label-short {
+    display: inline;
+  }
 }
 
 /* ====================================================================
@@ -811,6 +897,32 @@
 
 .jd-footer .tag-exemplo {
   margin: 0 2px;
+}
+
+.lp-footer__cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--jd-space-2);
+}
+
+.lp-footer__cta-title {
+  color: var(--jd-branco);
+  font-size: var(--jd-text-sm);
+  font-weight: var(--jd-fw-semibold);
+  margin: 0;
+}
+
+.lp-footer__wa-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  font-size: var(--jd-text-sm);
+  font-weight: 700;
+  margin-top: var(--jd-space-1);
 }
 
 /* ====================================================================
