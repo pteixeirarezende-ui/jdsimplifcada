@@ -766,7 +766,9 @@ const WHATSAPP_NUMBER = '5562999940769';
 
       // Recupera dados preenchidos (com fallback inteligente se preencheu apenas contato)
       const tipoSelected = document.querySelector('[data-tipo-btn].is-selected');
-      const tipoNome = tipoSelected ? (tipoSelected.querySelector('.jd-sim-tipo-btn__name') || {}).textContent.trim() : 'Ainda não sei';
+      const tipoNome = tipoSelected
+        ? (tipoSelected.getAttribute('data-tipo-valor') || (tipoSelected.querySelector('.jd-sim-tipo-btn__name') || {}).textContent || '').trim()
+        : 'Ainda não sei';
       const cidadeVal = (cidInp ? cidInp.value : '').trim();
       const ufVal = (ufInp ? ufInp.value : '').trim();
       const armazenarVal = (armInp && armInp.value) ? armInp.value.trim() : 'Não informado';

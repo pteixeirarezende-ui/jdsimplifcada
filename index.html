@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Orçamento de Câmara Fria Sob Medida | JD Câmaras Frias</title>
-  <meta name="description" content="Informe o que vai armazenar e as medidas do espaço e receba o orçamento da sua câmara fria sob medida pelo WhatsApp.">
+  <meta name="description" content="Preencha o formulário e a JD chama você no WhatsApp para montar o orçamento da sua câmara fria sob medida.">
   <meta name="robots" content="index, follow">
 
   <!-- Favicon -->
@@ -108,30 +108,30 @@
           </h1>
 
           <p class="jd-hero-a__subtitle" id="hero-subtitle" style="font-size:clamp(14px, 1.8vw, 17px);max-width:720px;margin:0 auto;color:var(--jd-cinza-aco);">
-            Informe o que vai armazenar e as medidas do espaço. A JD monta o orçamento e envia pelo WhatsApp.
+            Preencha o formulário e a JD chama você no WhatsApp para montar o orçamento.
           </p>
           <script>
             (function () {
               var V = window.JD_VARIANTS = {
                 preco: {
-                  h1: 'Quanto custa a sua câmara fria? Informe as medidas e receba o orçamento da JD',
-                  sub: 'Cada câmara é projetada sob medida, então o valor depende do tamanho, da temperatura e do uso. Conte o que você precisa e a JD envia o orçamento.'
+                  h1: 'Quanto custa a sua câmara fria? Peça o orçamento sob medida da JD',
+                  sub: 'Preencha o formulário e a JD chama você no WhatsApp para montar o orçamento. A JD pede as medidas pelo WhatsApp.'
                 },
                 mini: {
                   h1: 'Mini câmara fria sob medida para o seu espaço',
-                  sub: 'Para quem tem pouco espaço e precisa de frio. Informe o que vai armazenar e as medidas e receba o orçamento da JD.'
+                  sub: 'Para quem tem pouco espaço e precisa de frio. Preencha o formulário e a JD pede as medidas pelo WhatsApp.'
                 },
                 walkin: {
                   h1: 'Câmara fria para bebidas: walk-in cooler sob medida, entregue e instalada',
-                  sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
+                  sub: 'Preencha o formulário e a JD chama você no WhatsApp para montar o orçamento.'
                 },
                 congelados: {
-                  h1: 'Câmara de congelados (-18 °C) sob medida, com instalação pela JD',
-                  sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
+                  h1: 'Câmara de congelados sob medida, com instalação pela JD',
+                  sub: 'Preencha o formulário e a JD chama você no WhatsApp para montar o orçamento.'
                 },
                 resfriados: {
-                  h1: 'Câmara de resfriados (0 a +15 °C) sob medida, com instalação pela JD',
-                  sub: 'Informe o que vai armazenar e as medidas do espaço e receba o orçamento da JD.'
+                  h1: 'Câmara de resfriados sob medida, com instalação pela JD',
+                  sub: 'Preencha o formulário e a JD chama você no WhatsApp para montar o orçamento.'
                 }
               };
               var key = 'padrao';
@@ -195,32 +195,37 @@
                 <input type="hidden" id="lp-field-timestamp_envio" name="timestamp_envio" value="">
                 <input type="hidden" id="lp-field-consent_ads" name="consent_ads" value="pending">
                 <input type="hidden" id="lp-field-consent_analytics" name="consent_analytics" value="pending">
+                <!-- Campos mantidos ocultos para preservar o payload do webhook -->
+                <input type="hidden" id="sim-field-armazenar" name="armazenar" value="Não informado">
+                <input type="hidden" id="sim-field-c" name="comprimento" value="">
+                <input type="hidden" id="sim-field-l" name="largura" value="">
+                <input type="hidden" id="sim-field-a" name="altura" value="">
                 
                 <!-- 1. TIPO DE CÂMARA -->
                 <div class="jd-sim-section">
                   <label class="jd-sim-section-label jd-sim-section-label--required">1. Qual tipo de câmara você procura?</label>
                   <div class="jd-sim-tipo-grid">
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="mini" role="button" tabindex="0" aria-pressed="false">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="mini" data-tipo-valor="Mini câmara" role="button" tabindex="0" aria-pressed="false">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">🧊</span>
                       <span class="jd-sim-tipo-btn__name">Mini câmara</span>
                     </div>
 
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="expositora" role="button" tabindex="0" aria-pressed="false">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="expositora" data-tipo-valor="Câmara expositora (walk-in cooler)" role="button" tabindex="0" aria-pressed="false">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">🏪</span>
                       <span class="jd-sim-tipo-btn__name">Câmara expositora (walk-in cooler)</span>
                     </div>
 
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="resfriados" role="button" tabindex="0" aria-pressed="false">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="resfriados" data-tipo-valor="Câmara de resfriados (0 a +15 °C)" role="button" tabindex="0" aria-pressed="false">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">🌡</span>
-                      <span class="jd-sim-tipo-btn__name">Câmara de resfriados (0 a +15 °C)</span>
+                      <span class="jd-sim-tipo-btn__name">Câmara de resfriados</span>
                     </div>
 
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="congelados" role="button" tabindex="0" aria-pressed="false">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="congelados" data-tipo-valor="Câmara de congelados (-18 °C)" role="button" tabindex="0" aria-pressed="false">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">❄</span>
-                      <span class="jd-sim-tipo-btn__name">Câmara de congelados (-18 °C)</span>
+                      <span class="jd-sim-tipo-btn__name">Câmara de congelados</span>
                     </div>
 
-                    <div class="jd-sim-tipo-btn" data-tipo-btn="indefinido" role="button" tabindex="0" aria-pressed="false">
+                    <div class="jd-sim-tipo-btn" data-tipo-btn="indefinido" data-tipo-valor="Ainda não sei" role="button" tabindex="0" aria-pressed="false">
                       <span class="jd-sim-tipo-btn__icon" aria-hidden="true">❓</span>
                       <span class="jd-sim-tipo-btn__name">Ainda não sei</span>
                     </div>
@@ -228,7 +233,7 @@
                   <div class="jd-sim-error-msg" id="sim-tipo-error" role="alert">Escolha o tipo de câmara</div>
                 </div>
 
-                <!-- 2. DADOS DE CONTATO (Ajuste 5: antes de medidas) -->
+                <!-- 2. DADOS DE CONTATO -->
                 <div class="jd-sim-section">
                   <label class="jd-sim-section-label jd-sim-section-label--required">2. Seus dados para contato</label>
                   <div class="jd-sim-contato-grid">
@@ -244,27 +249,9 @@
                   </div>
                 </div>
 
-                <!-- 3. O QUE VAI ARMAZENAR -->
+                <!-- 3. LOCALIZAÇÃO -->
                 <div class="jd-sim-section">
-                  <label for="sim-field-armazenar" class="jd-sim-section-label jd-sim-section-label--required">3. O que vai armazenar?</label>
-                  <select id="sim-field-armazenar" class="jd-sim-select" required>
-                    <option value="" disabled selected>Selecione</option>
-                    <option value="Carnes e aves">🥩 Carnes e Aves</option>
-                    <option value="Bebidas e cervejas">🍺 Bebidas e Cervejas</option>
-                    <option value="Laticínios e queijos">🧀 Laticínios e Queijos</option>
-                    <option value="Hortaliças e frutas">🥬 Hortaliças e Frutas</option>
-                    <option value="Peixes e frutos do mar">🐟 Peixes e Pescados</option>
-                    <option value="Sorvetes, gelo e açaí">🍦 Sorvetes, Gelo e Açaí</option>
-                    <option value="Massas e pães congelados">🥐 Massas e Pães</option>
-                    <option value="Medicamentos e vacinas">💊 Medicamentos e Vacinas</option>
-                    <option value="Flores e folhagens">💐 Flores e Plantas</option>
-                    <option value="Outro produto">📦 Outro Produto</option>
-                  </select>
-                </div>
-
-                <!-- 4. LOCALIZAÇÃO -->
-                <div class="jd-sim-section">
-                  <label class="jd-sim-section-label jd-sim-section-label--required">4. Onde será instalada?</label>
+                  <label class="jd-sim-section-label jd-sim-section-label--required">3. Onde será instalada?</label>
                   <div class="jd-sim-grid-duo">
                     <div>
                       <label for="sim-field-cidade" class="jd-sim-field-sublabel">Cidade de instalação *</label>
@@ -307,47 +294,6 @@
                   </div>
                 </div>
 
-                <!-- 5. MEDIDAS DO ESPAÇO (OPCIONAL, 3 NA MESMA LINHA) -->
-                <div class="jd-sim-section">
-                  <label class="jd-sim-section-label">
-                    5. Medidas aproximadas (opcional)
-                  </label>
-                  <div class="jd-sim-medidas-grid">
-                    <!-- Comprimento -->
-                    <div class="jd-sim-medida-box">
-                      <label for="sim-field-c" class="jd-sim-medida-lbl">
-                        <span>Comprimento</span>
-                      </label>
-                      <label for="sim-field-c" class="jd-sim-medida-input-wrap">
-                        <input type="number" id="sim-field-c" class="jd-sim-medida-input" placeholder="ex.: 3,0" step="any" aria-label="Comprimento em metros">
-                        <span class="jd-sim-medida-unit" aria-hidden="true">m</span>
-                      </label>
-                    </div>
-
-                    <!-- Largura -->
-                    <div class="jd-sim-medida-box">
-                      <label for="sim-field-l" class="jd-sim-medida-lbl">
-                        <span>Largura</span>
-                      </label>
-                      <label for="sim-field-l" class="jd-sim-medida-input-wrap">
-                        <input type="number" id="sim-field-l" class="jd-sim-medida-input" placeholder="ex.: 2,5" step="any" aria-label="Largura em metros">
-                        <span class="jd-sim-medida-unit" aria-hidden="true">m</span>
-                      </label>
-                    </div>
-
-                    <!-- Altura -->
-                    <div class="jd-sim-medida-box">
-                      <label for="sim-field-a" class="jd-sim-medida-lbl">
-                        <span>Altura</span>
-                      </label>
-                      <label for="sim-field-a" class="jd-sim-medida-input-wrap">
-                        <input type="number" id="sim-field-a" class="jd-sim-medida-input" placeholder="ex.: 2,8" step="any" aria-label="Altura em metros">
-                        <span class="jd-sim-medida-unit" aria-hidden="true">m</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
                 <!-- BOTÃO DE ENVIO PRINCIPAL -->
                 <button type="submit" class="jd-btn jd-btn--primary jd-sim-submit-btn" id="sim-btn-submit">
                   <span>Receber Meu Orçamento</span>
@@ -381,7 +327,7 @@
                 Pedido de Orçamento Recebido!
               </h3>
               <p style="font-size:14px;color:var(--jd-cinza-aco);margin-bottom:20px;max-width:540px;margin-left:auto;margin-right:auto;line-height:1.5;">
-                Nossos consultores técnicos receberam suas medidas e já estão preparando o projeto da sua câmara fria. Entraremos em contato pelo seu WhatsApp.
+                Recebemos o seu pedido. A JD vai chamar você no WhatsApp para entender o projeto e pedir as medidas.
               </p>
               <a href="#" class="jd-btn jd-btn--whatsapp" id="sim-succ-wa-btn" data-whatsapp-btn="sucesso" style="display:inline-flex;padding:12px 24px;">
                 <span>Falar Agora no WhatsApp com a JD</span>
